@@ -592,6 +592,96 @@
             margin-top: 10px;
         }
 
+        /* History View */
+        .history-screen {
+            min-height: 100vh;
+            padding: 16px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        .history-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 18px;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        .history-back:active { background: rgba(255,255,255,0.28); }
+        .history-title {
+            color: white;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .history-day {
+            background: var(--md-surface);
+            border-radius: var(--md-shape-md);
+            box-shadow: var(--md-elevation-1);
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .history-day-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+        }
+        .history-day-header:active { background: var(--md-surface-container); }
+        .history-day-date {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--md-on-surface);
+        }
+        .history-day-stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--md-on-surface-variant);
+        }
+        .history-day-stats .stat-done { color: var(--md-success); }
+        .history-day-stats .stat-stars { color: var(--md-tertiary); }
+        .history-day-arrow {
+            font-size: 16px;
+            color: var(--md-on-surface-variant);
+            transition: transform 0.2s;
+        }
+        .history-day-arrow.open { transform: rotate(180deg); }
+        .history-day-body {
+            display: none;
+            padding: 0 16px 14px;
+            border-top: 1px solid var(--md-outline-variant);
+        }
+        .history-day-body.open { display: block; }
+        .history-task {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        .history-task .ht-emoji { font-size: 20px; width: 28px; text-align: center; }
+        .history-task .ht-name { flex: 1; }
+        .history-task.incomplete .ht-name { color: var(--md-on-surface-variant); text-decoration: line-through; opacity: 0.5; }
+        .history-task .ht-check { font-size: 16px; }
+        .history-loading { text-align: center; color: white; padding: 40px 20px; font-size: 15px; }
+        .history-empty { text-align: center; color: rgba(255,255,255,0.8); padding: 40px 20px; font-size: 15px; }
+
         /* Responsive */
         @media (max-width: 420px) {
             .header h1 { font-size: 26px; }
@@ -626,6 +716,19 @@ const $$ = sel => document.querySelectorAll(sel);
 
 function dayInfo() {
     const d = new Date(), i = d.getDay();
+    const names = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const isWE = i===0||i===6;
+    return {
+        name: names[i], isWeekend: isWE, isWeekday: !isWE,
+        isSchoolNight: i>=0&&i<=4,
+        display: d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})
+    };
+}
+
+function dayInfoFor(dateStr) {
+    const parts = dateStr.split('-');
+    const d = new Date(+parts[0], +parts[1]-1, +parts[2]);
+    const i = d.getDay();
     const names = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
     const isWE = i===0||i===6;
     return {
@@ -1150,6 +1253,7 @@ function openSheet() {
 
         <div class="sheet-divider"></div>
 
+        <button class="md-btn md-btn-tonal md-btn-full" id="btnHistory" style="margin-bottom:10px">📅 View History</button>
         <button class="md-btn md-btn-tonal md-btn-full" id="btnRefreshSheet" style="margin-bottom:10px">↻ Refresh from Google Sheet</button>
         <button class="md-btn md-btn-text md-btn-full md-btn-danger" id="btnResetStars">Reset All Stars</button>
     `;
@@ -1196,6 +1300,7 @@ function openSheet() {
         });
     }
 
+    document.getElementById('btnHistory').addEventListener('click', ()=>{ showHistory(); });
     document.getElementById('btnRefreshSheet').addEventListener('click', ()=>{ closeSheet(); showMain(); });
     document.getElementById('btnResetStars').addEventListener('click', ()=>{
         if (confirm('Reset ALL stars to zero? This cannot be undone.')) {
@@ -1208,6 +1313,117 @@ function openSheet() {
     // Animate open
     document.getElementById('backdrop').classList.add('open');
     document.getElementById('bottomSheet').classList.add('open');
+}
+
+async function showHistory() {
+    closeSheet();
+    const allTasks = cached('tasks') || [];
+    const ov = loadOverrides();
+
+    app.innerHTML = `
+    <div class="history-screen">
+        <button class="history-back" id="histBack">← Back</button>
+        <div class="history-title">History</div>
+        <div class="history-loading"><div class="spinner"></div>Loading history…</div>
+    </div>`;
+    document.getElementById('histBack').addEventListener('click', showMain);
+
+    let history;
+    try {
+        const r = await fetch(CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret + '&type=history');
+        if (!r.ok) throw new Error();
+        history = await r.json();
+    } catch {
+        app.innerHTML = `
+        <div class="history-screen">
+            <button class="history-back" id="histBack2">← Back</button>
+            <div class="history-title">History</div>
+            <div class="history-empty">Couldn't load history. Check your connection.</div>
+        </div>`;
+        document.getElementById('histBack2').addEventListener('click', showMain);
+        return;
+    }
+
+    // history should be an array of {date, completions} or object keyed by date
+    let days = [];
+    if (Array.isArray(history)) {
+        days = history;
+    } else if (history && typeof history === 'object') {
+        days = Object.entries(history).map(([date, val]) => ({
+            date,
+            completions: Array.isArray(val) ? val : (val?.completions || [])
+        }));
+    }
+
+    // Sort newest first
+    days.sort((a,b) => b.date.localeCompare(a.date));
+
+    // Filter out days with no data
+    days = days.filter(d => d.completions && d.completions.length > 0);
+
+    if (days.length === 0) {
+        app.innerHTML = `
+        <div class="history-screen">
+            <button class="history-back" id="histBack3">← Back</button>
+            <div class="history-title">History</div>
+            <div class="history-empty">No history yet. Complete some tasks first!</div>
+        </div>`;
+        document.getElementById('histBack3').addEventListener('click', showMain);
+        return;
+    }
+
+    const dayCards = days.map((day, idx) => {
+        const di = dayInfoFor(day.date);
+        // Figure out which tasks applied that day (assume no overrides for past days)
+        const pastOv = {noSchool: false, summer: ov.summer};
+        const dayTasks = allTasks.filter(t => matchesDay(t.days, di, pastOv));
+        const completedIds = day.completions || [];
+        const nDone = dayTasks.filter(t => completedIds.includes(t.id)).length;
+        const nTotal = dayTasks.length;
+        const starsEarned = dayTasks.filter(t => completedIds.includes(t.id)).reduce((sum, t) => sum + t.stars, 0)
+            + (nDone === nTotal && nTotal > 0 ? DAILY_BONUS : 0);
+
+        const taskList = dayTasks.map(t => {
+            const done = completedIds.includes(t.id);
+            return `<div class="history-task ${done ? '' : 'incomplete'}">
+                <span class="ht-emoji">${t.emoji}</span>
+                <span class="ht-name">${t.name}</span>
+                <span class="ht-check">${done ? '✅' : '⬜'}</span>
+            </div>`;
+        }).join('');
+
+        return `<div class="history-day">
+            <div class="history-day-header" data-idx="${idx}">
+                <div class="history-day-date">${di.display}</div>
+                <div class="history-day-stats">
+                    <span class="stat-done">${nDone}/${nTotal}</span>
+                    <span class="stat-stars">⭐ ${starsEarned}</span>
+                </div>
+                <span class="history-day-arrow" id="arrow-${idx}">▼</span>
+            </div>
+            <div class="history-day-body" id="body-${idx}">${taskList}</div>
+        </div>`;
+    }).join('');
+
+    app.innerHTML = `
+    <div class="history-screen">
+        <button class="history-back" id="histBack4">← Back</button>
+        <div class="history-title">History</div>
+        ${dayCards}
+    </div>`;
+
+    document.getElementById('histBack4').addEventListener('click', showMain);
+
+    // Collapsible day cards
+    document.querySelectorAll('.history-day-header').forEach(hdr => {
+        hdr.addEventListener('click', function() {
+            const i = this.dataset.idx;
+            const body = document.getElementById('body-' + i);
+            const arrow = document.getElementById('arrow-' + i);
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        });
+    });
 }
 
 function closeSheet() {
