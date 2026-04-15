@@ -54,24 +54,15 @@
         }
 
         /* ===== MATERIAL COMPONENTS ===== */
-
-        /* Ripple */
-        .md-ripple {
-            position: relative;
-            overflow: hidden;
-        }
+        .md-ripple { position: relative; overflow: hidden; }
         .md-ripple::after {
             content: '';
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             background: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), rgba(0,0,0,0.08) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
+            opacity: 0; transition: opacity 0.2s; pointer-events: none;
         }
         .md-ripple:active::after { opacity: 1; }
 
-        /* Card */
         .md-card {
             background: var(--md-surface);
             border-radius: var(--md-shape-md);
@@ -79,454 +70,172 @@
             transition: box-shadow 0.2s, transform 0.2s;
         }
 
-        /* Toggle Switch */
         .md-switch { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
         .md-switch label { font-size: 15px; font-weight: 500; color: var(--md-on-surface); flex: 1; }
         .md-switch-track {
-            width: 52px; height: 32px;
-            background: var(--md-outline);
-            border-radius: 16px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.25s;
-            flex-shrink: 0;
+            width: 52px; height: 32px; background: var(--md-outline); border-radius: 16px;
+            position: relative; cursor: pointer; transition: background 0.25s; flex-shrink: 0;
         }
         .md-switch-track.on { background: var(--md-primary); }
         .md-switch-thumb {
-            width: 24px; height: 24px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 4px; left: 4px;
-            transition: transform 0.25s;
+            width: 24px; height: 24px; background: white; border-radius: 50%;
+            position: absolute; top: 4px; left: 4px; transition: transform 0.25s;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .md-switch-track.on .md-switch-thumb { transform: translateX(20px); }
 
-        /* Button */
         .md-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 24px;
-            border-radius: var(--md-shape-xl);
-            font-family: inherit;
-            font-size: 15px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 12px 24px; border-radius: var(--md-shape-xl); font-family: inherit;
+            font-size: 15px; font-weight: 500; border: none; cursor: pointer;
             transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-            gap: 8px;
-            letter-spacing: 0.02em;
+            gap: 8px; letter-spacing: 0.02em;
         }
         .md-btn:active { transform: scale(0.97); }
-        .md-btn-filled {
-            background: var(--md-primary);
-            color: var(--md-on-primary);
-            box-shadow: var(--md-elevation-1);
-        }
+        .md-btn-filled { background: var(--md-primary); color: var(--md-on-primary); box-shadow: var(--md-elevation-1); }
         .md-btn-filled:active { box-shadow: var(--md-elevation-2); }
-        .md-btn-tonal {
-            background: var(--md-primary-container);
-            color: var(--md-on-primary-container);
-        }
-        .md-btn-outline {
-            background: transparent;
-            color: var(--md-primary);
-            border: 1px solid var(--md-outline);
-        }
-        .md-btn-text {
-            background: transparent;
-            color: var(--md-primary);
-        }
+        .md-btn-tonal { background: var(--md-primary-container); color: var(--md-on-primary-container); }
+        .md-btn-outline { background: transparent; color: var(--md-primary); border: 1px solid var(--md-outline); }
+        .md-btn-text { background: transparent; color: var(--md-primary); }
         .md-btn-full { width: 100%; }
         .md-btn-danger { background: #fef2f2; color: var(--md-error); }
 
-        /* Chip */
-        .md-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
         /* ===== MAIN SCREEN ===== */
         .main-screen {
-            min-height: 100vh;
-            padding: 16px;
+            min-height: 100vh; padding: 16px;
             padding-top: max(16px, env(safe-area-inset-top));
             padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 80px);
-            max-width: 640px;
-            margin: 0 auto;
+            max-width: 640px; margin: 0 auto;
         }
 
-        /* Header */
-        .header {
-            text-align: center;
-            color: white;
-            padding: 20px 0 12px;
-        }
-        .header h1 {
-            font-size: 30px;
-            font-weight: 900;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            margin-bottom: 2px;
-        }
-        .header .date {
-            font-size: 15px;
-            font-weight: 500;
-            opacity: 0.9;
-        }
+        .header { text-align: center; color: white; padding: 20px 0 12px; }
+        .header h1 { font-size: 30px; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,0.12); margin-bottom: 2px; }
+        .header .date { font-size: 15px; font-weight: 500; opacity: 0.9; }
 
-        /* Star counter */
         .star-counter {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 8px 18px;
-            border-radius: 24px;
-            margin-top: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            transition: transform 0.3s;
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 8px 18px; border-radius: 24px; margin-top: 12px;
+            font-size: 18px; font-weight: 700; color: white; transition: transform 0.3s;
         }
-        .star-counter.bounce {
-            animation: starBounce 0.4s ease;
-        }
-        @keyframes starBounce {
-            0%, 100% { transform: scale(1); }
-            40% { transform: scale(1.15); }
-        }
+        .star-counter.bounce { animation: starBounce 0.4s ease; }
+        @keyframes starBounce { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.15); } }
 
-        /* Progress */
         .progress-container {
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 14px;
-            height: 28px;
-            margin: 16px 0 20px;
-            overflow: hidden;
-            position: relative;
+            background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-radius: 14px; height: 28px; margin: 16px 0 20px; overflow: hidden; position: relative;
         }
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #34d399, #a3e635);
-            border-radius: 14px;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 13px;
-            font-weight: 700;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #34d399, #a3e635); border-radius: 14px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 13px; font-weight: 700; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.15); }
 
-        /* Section */
         .section { margin-bottom: 24px; }
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 4px;
-            margin-bottom: 10px;
-        }
+        .section-header { display: flex; align-items: center; gap: 8px; padding: 0 4px; margin-bottom: 10px; }
         .section-header .emoji { font-size: 20px; }
-        .section-header .label {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: rgba(255,255,255,0.85);
-        }
+        .section-header .label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.85); }
 
-        /* Task Card */
         .task-card {
-            background: var(--md-surface);
-            border-radius: var(--md-shape-md);
-            padding: 16px 18px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: var(--md-elevation-1);
-            margin-bottom: 8px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
+            background: var(--md-surface); border-radius: var(--md-shape-md);
+            padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+            box-shadow: var(--md-elevation-1); margin-bottom: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
         }
         .task-card:active:not(.done) { transform: scale(0.98); box-shadow: var(--md-elevation-2); }
-
-        .task-card.done {
-            background: var(--md-success-container);
-            box-shadow: none;
-            opacity: 0.7;
-            transform: scale(0.98);
-        }
+        .task-card.done { background: var(--md-success-container); box-shadow: none; opacity: 0.7; transform: scale(0.98); }
         .task-card.done .task-name { text-decoration: line-through; color: var(--md-on-surface-variant); }
 
         .task-emoji { font-size: 32px; width: 42px; text-align: center; flex-shrink: 0; line-height: 1; }
         .task-name { font-size: 17px; font-weight: 500; flex: 1; line-height: 1.3; }
-        .task-stars {
-            display: flex;
-            gap: 1px;
-            flex-shrink: 0;
-            font-size: 14px;
-            color: var(--md-tertiary);
-            margin-right: 4px;
-        }
+        .task-stars { display: flex; gap: 1px; flex-shrink: 0; font-size: 14px; color: var(--md-tertiary); margin-right: 4px; }
         .task-check {
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            border: 2.5px solid var(--md-outline);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.25s ease;
+            width: 36px; height: 36px; border-radius: 50%; border: 2.5px solid var(--md-outline);
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease;
         }
-        .task-card.done .task-check {
-            background: var(--md-success);
-            border-color: var(--md-success);
-        }
-        .task-check svg {
-            width: 18px; height: 18px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
+        .task-card.done .task-check { background: var(--md-success); border-color: var(--md-success); }
+        .task-check svg { width: 18px; height: 18px; opacity: 0; transition: opacity 0.2s; }
         .task-card.done .task-check svg { opacity: 1; }
 
         /* Rewards Section */
-        .rewards-section {
-            margin-top: 8px;
-            margin-bottom: 24px;
-        }
-        .rewards-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 4px;
-            margin-bottom: 12px;
-            cursor: pointer;
-        }
-        .rewards-header .label {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: rgba(255,255,255,0.85);
-            flex: 1;
-        }
-        .rewards-header .toggle-arrow {
-            color: rgba(255,255,255,0.6);
-            font-size: 20px;
-            transition: transform 0.3s;
-        }
+        .rewards-section { margin-top: 8px; margin-bottom: 24px; }
+        .rewards-header { display: flex; align-items: center; gap: 8px; padding: 0 4px; margin-bottom: 12px; cursor: pointer; }
+        .rewards-header .label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.85); flex: 1; }
+        .rewards-header .toggle-arrow { color: rgba(255,255,255,0.6); font-size: 20px; transition: transform 0.3s; }
         .rewards-header .toggle-arrow.open { transform: rotate(180deg); }
-
         .rewards-body { display: none; }
         .rewards-body.open { display: block; }
 
         .reward-tier {
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: var(--md-shape-md);
-            padding: 14px 16px;
-            margin-bottom: 10px;
+            background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-radius: var(--md-shape-md); padding: 14px 16px; margin-bottom: 10px;
         }
-        .tier-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .tier-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: white;
-        }
-        .tier-cost {
-            font-size: 13px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.8);
-            background: rgba(255,255,255,0.15);
-            padding: 3px 10px;
-            border-radius: 12px;
-        }
-        .tier-cost.affordable {
-            background: rgba(52,211,153,0.3);
-            color: #a7f3d0;
-        }
-        .tier-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .reward-chip {
-            background: rgba(255,255,255,0.15);
-            color: rgba(255,255,255,0.9);
-            padding: 5px 12px;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        .reward-chip.affordable {
-            background: rgba(255,255,255,0.25);
-            color: white;
-        }
+        .tier-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .tier-name { font-size: 15px; font-weight: 700; color: white; }
+        .tier-cost { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.15); padding: 3px 10px; border-radius: 12px; }
+        .tier-cost.affordable { background: rgba(52,211,153,0.3); color: #a7f3d0; }
+        .tier-items { display: flex; flex-wrap: wrap; gap: 6px; }
+        .reward-chip { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); padding: 5px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; }
+        .reward-chip.affordable { background: rgba(255,255,255,0.25); color: white; }
 
         /* Celebration */
-        .celebration {
-            text-align: center;
-            padding: 32px 16px 16px;
-            animation: bounceIn 0.6s ease;
-        }
+        .celebration { text-align: center; padding: 32px 16px 16px; animation: bounceIn 0.6s ease; }
         .celebration .big-emoji { font-size: 72px; display: block; margin-bottom: 8px; animation: bounce 1.2s ease infinite; }
         .celebration h2 { font-size: 26px; color: white; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.12); }
         .celebration p { color: rgba(255,255,255,0.9); font-size: 16px; margin-top: 4px; }
-        .celebration .bonus {
-            display: inline-block;
-            background: var(--md-tertiary);
-            color: white;
-            padding: 4px 14px;
-            border-radius: 16px;
-            font-size: 14px;
-            font-weight: 700;
-            margin-top: 10px;
-        }
+        .celebration .bonus { display: inline-block; background: var(--md-tertiary); color: white; padding: 4px 14px; border-radius: 16px; font-size: 14px; font-weight: 700; margin-top: 10px; }
         @keyframes bounceIn { 0% { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
         @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
         /* Settings FAB */
         .fab-settings {
-            position: fixed;
-            bottom: max(20px, env(safe-area-inset-bottom));
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 16px;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--md-elevation-2);
-            transition: transform 0.2s, background 0.2s;
-            z-index: 50;
+            position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); right: 20px;
+            width: 56px; height: 56px; background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: none; border-radius: 16px; color: white; font-size: 24px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--md-elevation-2); transition: transform 0.2s, background 0.2s; z-index: 50;
         }
         .fab-settings:active { transform: scale(0.92); background: rgba(255,255,255,0.3); }
 
-        /* Bottom Sheet (Parent Panel) */
-        .sheet-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+        /* Sync indicator */
+        .sync-dot {
+            position: fixed; top: max(8px, env(safe-area-inset-top)); right: 12px;
+            width: 8px; height: 8px; border-radius: 50%; z-index: 50;
+            transition: background 0.3s;
         }
-        .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+        .sync-dot.connected { background: rgba(52,211,153,0.8); }
+        .sync-dot.syncing { background: rgba(250,204,21,0.8); animation: pulse 1s ease infinite; }
+        .sync-dot.error { background: rgba(239,68,68,0.8); }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
+        /* Bottom Sheet */
+        .sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
         .bottom-sheet {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--md-surface);
-            border-radius: 28px 28px 0 0;
-            z-index: 101;
-            transform: translateY(100%);
+            position: fixed; bottom: 0; left: 0; right: 0; background: var(--md-surface);
+            border-radius: 28px 28px 0 0; z-index: 101; transform: translateY(100%);
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            max-height: 85vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            max-height: 85vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
         .bottom-sheet.open { transform: translateY(0); }
-
-        .sheet-handle {
-            width: 32px;
-            height: 4px;
-            background: var(--md-outline);
-            border-radius: 2px;
-            margin: 12px auto 0;
-        }
+        .sheet-handle { width: 32px; height: 4px; background: var(--md-outline); border-radius: 2px; margin: 12px auto 0; }
         .sheet-content { padding: 20px 24px; }
-        .sheet-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--md-on-surface);
-        }
-        .sheet-section-label {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--md-on-surface-variant);
-            margin-bottom: 8px;
-            margin-top: 20px;
-        }
+        .sheet-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--md-on-surface); }
+        .sheet-section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--md-on-surface-variant); margin-bottom: 8px; margin-top: 20px; }
         .sheet-section-label:first-of-type { margin-top: 0; }
-        .sheet-divider {
-            height: 1px;
-            background: var(--md-outline-variant);
-            margin: 16px 0;
-        }
+        .sheet-divider { height: 1px; background: var(--md-outline-variant); margin: 16px 0; }
 
-        .star-summary {
-            background: var(--md-tertiary-container);
-            border-radius: var(--md-shape-md);
-            padding: 16px;
-            margin-bottom: 16px;
-        }
+        .star-summary { background: var(--md-tertiary-container); border-radius: var(--md-shape-md); padding: 16px; margin-bottom: 16px; }
         .star-summary .star-num { font-size: 28px; font-weight: 900; color: var(--md-tertiary); margin-bottom: 4px; }
-        .star-breakdown {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px 16px;
-            font-size: 13px;
-            color: var(--md-on-surface-variant);
-        }
+        .star-breakdown { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--md-on-surface-variant); }
         .star-breakdown span { white-space: nowrap; }
 
-        .redeem-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--md-outline-variant);
-        }
+        .redeem-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--md-outline-variant); }
         .redeem-item:last-child { border-bottom: none; }
         .redeem-emoji { font-size: 24px; width: 32px; text-align: center; }
         .redeem-info { flex: 1; }
         .redeem-name { font-size: 15px; font-weight: 500; }
         .redeem-cost { font-size: 13px; color: var(--md-on-surface-variant); }
-        .redeem-btn {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
-        }
+        .redeem-btn { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; font-family: inherit; }
         .redeem-btn.can-afford { background: var(--md-primary); color: white; }
         .redeem-btn.cant-afford { background: var(--md-surface-container); color: var(--md-on-surface-variant); cursor: default; }
 
@@ -535,14 +244,7 @@
         .spinner { width: 40px; height: 40px; border: 3.5px solid rgba(255,255,255,0.25); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .error-card {
-            background: var(--md-surface);
-            border-radius: var(--md-shape-xl);
-            padding: 32px 24px;
-            text-align: center;
-            box-shadow: var(--md-elevation-3);
-            margin: 40px 20px;
-        }
+        .error-card { background: var(--md-surface); border-radius: var(--md-shape-xl); padding: 32px 24px; text-align: center; box-shadow: var(--md-elevation-3); margin: 40px 20px; }
         .error-card h3 { color: var(--md-error); font-size: 18px; margin-bottom: 10px; }
         .error-card p { font-size: 14px; color: var(--md-on-surface-variant); line-height: 1.6; margin-bottom: 20px; }
 
@@ -551,139 +253,44 @@
         .no-chores h2 { font-size: 26px; margin-bottom: 6px; }
         .no-chores p { opacity: 0.85; font-size: 16px; }
 
-        /* Star float animation */
-        .star-float {
-            position: fixed;
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--md-tertiary);
-            pointer-events: none;
-            z-index: 200;
-            animation: floatUp 0.9s ease-out forwards;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.15);
-        }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-70px) scale(1.4); }
-        }
+        .star-float { position: fixed; font-size: 20px; font-weight: 800; color: var(--md-tertiary); pointer-events: none; z-index: 200; animation: floatUp 0.9s ease-out forwards; text-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-70px) scale(1.4); } }
 
-        /* Confetti */
-        .confetti-piece {
-            position: fixed;
-            border-radius: 3px;
-            animation: confettiFall 3.5s ease-out forwards;
-            pointer-events: none;
-            z-index: 1000;
-        }
-        @keyframes confettiFall {
-            0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
-            100% { transform: translateY(105vh) rotate(900deg) scale(0.4); opacity: 0; }
-        }
+        .confetti-piece { position: fixed; border-radius: 3px; animation: confettiFall 3.5s ease-out forwards; pointer-events: none; z-index: 1000; }
+        @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; } 100% { transform: translateY(105vh) rotate(900deg) scale(0.4); opacity: 0; } }
 
-        /* Override chip */
-        .override-banner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            background: rgba(251, 191, 36, 0.2);
-            color: #fde68a;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
+        .override-banner { display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(251, 191, 36, 0.2); color: #fde68a; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-top: 10px; }
 
         /* History View */
-        .history-screen {
-            min-height: 100vh;
-            padding: 16px;
-            padding-top: max(16px, env(safe-area-inset-top));
-            padding-bottom: max(16px, env(safe-area-inset-bottom));
-            max-width: 640px;
-            margin: 0 auto;
-        }
-        .history-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: white;
-            font-size: 15px;
-            font-weight: 600;
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 20px;
-            padding: 8px 18px;
-            cursor: pointer;
-            margin-bottom: 16px;
-        }
+        .history-screen { min-height: 100vh; padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: max(16px, env(safe-area-inset-bottom)); max-width: 640px; margin: 0 auto; }
+        .history-back { display: inline-flex; align-items: center; gap: 6px; color: white; font-size: 15px; font-weight: 600; background: rgba(255,255,255,0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: none; border-radius: 20px; padding: 8px 18px; cursor: pointer; margin-bottom: 16px; }
         .history-back:active { background: rgba(255,255,255,0.28); }
-        .history-title {
-            color: white;
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 16px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.12);
-        }
-        .history-day {
-            background: var(--md-surface);
-            border-radius: var(--md-shape-md);
-            box-shadow: var(--md-elevation-1);
-            margin-bottom: 10px;
-            overflow: hidden;
-        }
-        .history-day-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            cursor: pointer;
-        }
+        .history-title { color: white; font-size: 24px; font-weight: 800; margin-bottom: 16px; text-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+        .history-day { background: var(--md-surface); border-radius: var(--md-shape-md); box-shadow: var(--md-elevation-1); margin-bottom: 10px; overflow: hidden; }
+        .history-day-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
         .history-day-header:active { background: var(--md-surface-container); }
-        .history-day-date {
-            flex: 1;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--md-on-surface);
-        }
-        .history-day-stats {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--md-on-surface-variant);
-        }
+        .history-day-date { flex: 1; font-size: 15px; font-weight: 600; color: var(--md-on-surface); }
+        .history-day-stats { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: var(--md-on-surface-variant); }
         .history-day-stats .stat-done { color: var(--md-success); }
         .history-day-stats .stat-stars { color: var(--md-tertiary); }
-        .history-day-arrow {
-            font-size: 16px;
-            color: var(--md-on-surface-variant);
-            transition: transform 0.2s;
-        }
+        .history-day-arrow { font-size: 16px; color: var(--md-on-surface-variant); transition: transform 0.2s; }
         .history-day-arrow.open { transform: rotate(180deg); }
-        .history-day-body {
-            display: none;
-            padding: 0 16px 14px;
-            border-top: 1px solid var(--md-outline-variant);
-        }
+        .history-day-body { display: none; padding: 0 16px 14px; border-top: 1px solid var(--md-outline-variant); }
         .history-day-body.open { display: block; }
-        .history-task {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            font-size: 14px;
-        }
+        .history-task { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; }
         .history-task .ht-emoji { font-size: 20px; width: 28px; text-align: center; }
         .history-task .ht-name { flex: 1; }
         .history-task.incomplete .ht-name { color: var(--md-on-surface-variant); text-decoration: line-through; opacity: 0.5; }
         .history-task .ht-check { font-size: 16px; }
         .history-loading { text-align: center; color: white; padding: 40px 20px; font-size: 15px; }
         .history-empty { text-align: center; color: rgba(255,255,255,0.8); padding: 40px 20px; font-size: 15px; }
+
+        .edit-stars-btn {
+            background: rgba(245,158,11,0.15); color: var(--md-tertiary); border: 1px solid rgba(245,158,11,0.3);
+            border-radius: 16px; padding: 6px 14px; font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: inherit; margin-top: 8px;
+        }
+        .edit-stars-btn:active { background: rgba(245,158,11,0.25); }
 
         /* Responsive */
         @media (max-width: 420px) {
@@ -696,14 +303,16 @@
 </head>
 <body>
 <div id="app"></div>
+<div class="sync-dot connected" id="syncDot"></div>
 <script>
 // ================================================================
-//  MY DAY — A daily routine & star rewards app powered by
-//  Google Sheets. Parent edits the sheet; kid taps on the iPad.
-//  Star system: "Calculate and Bank" model.
+//  MY DAY v4 — Simplified daily star totals
+//  Google Sheet "Stars" tab: Date | StarsEarned | StarsSpent | Completions
+//  Available = SUM(all earned) - SUM(all spent)
+//  Cross-device auto-refresh via version polling every 15s
 // ================================================================
 
-const PFX = 'myDay_v3';
+const PFX = 'myDay_v4';
 const DAILY_BONUS = 5;
 
 const CONFIG = {
@@ -713,8 +322,9 @@ const CONFIG = {
     syncSecret: "N3YR-owVtiuu3jkixUq4xg"
 };
 
-// ---- in-memory star bank (loaded from server on boot) ----
-let bank = { bankedStars: 0, totalSpent: 0 };
+// ---- in-memory star totals (loaded from server) ----
+let starData = { totalEarned: 0, totalSpent: 0, days: [], version: 0 };
+let currentView = 'main'; // 'main' or 'history'
 
 // ---- helpers ----
 const todayKey = () => new Date().toISOString().slice(0,10);
@@ -757,7 +367,7 @@ function matchesDay(dayStr, di, ov) {
     return raw.split(',').map(s=>s.trim()).includes(di.name);
 }
 
-// ---- storage (localStorage for completions, overrides, caches only) ----
+// ---- localStorage helpers ----
 function load(k,def) { try { return JSON.parse(localStorage.getItem(PFX+'_'+k))||def; } catch { return def; } }
 function save(k,v) { localStorage.setItem(PFX+'_'+k, JSON.stringify(v)); }
 
@@ -777,7 +387,7 @@ function saveOverrides(o) { save('overrides', o); }
 function cacheData(k,v) { try { localStorage.setItem(PFX+'_cache_'+k, JSON.stringify(v)); } catch{} }
 function cached(k) { try { return JSON.parse(localStorage.getItem(PFX+'_cache_'+k)); } catch { return null; } }
 
-// ---- pure star calculation ----
+// ---- pure star calculation for today ----
 function calculateTodayStars(todayTasks, completions) {
     let stars = 0;
     todayTasks.forEach(task => {
@@ -788,7 +398,8 @@ function calculateTodayStars(todayTasks, completions) {
 }
 
 function getAvailableStars(todayTasks, completions) {
-    return bank.bankedStars + calculateTodayStars(todayTasks, completions) - bank.totalSpent;
+    const todayStars = calculateTodayStars(todayTasks, completions);
+    return starData.totalEarned + todayStars - starData.totalSpent;
 }
 
 // ---- sync helpers ----
@@ -812,31 +423,38 @@ async function getFromSync(params) {
     try { return JSON.parse(text); } catch { return null; }
 }
 
-// ---- sync: bank ----
-async function loadBankFromSync() {
+// ---- sync: load all star data from server ----
+async function loadAllStars() {
     try {
-        const data = await getFromSync('type=bank');
-        if (data && typeof data.bankedStars === 'number') {
-            bank.bankedStars = data.bankedStars;
-            bank.totalSpent = data.totalSpent || 0;
+        setSyncStatus('syncing');
+        const data = await getFromSync('type=all_stars');
+        if (data && typeof data.totalEarned === 'number') {
+            // Exclude today's row from totals (we calculate today live)
+            const today = todayKey();
+            let todayEarned = 0, todaySpent = 0;
+            if (data.days) {
+                const todayRow = data.days.find(d => d.date === today);
+                if (todayRow) {
+                    todayEarned = todayRow.starsEarned || 0;
+                    todaySpent = todayRow.starsSpent || 0;
+                }
+            }
+            // totalEarned/totalSpent from server includes today's row
+            // We subtract today's earned because we recalculate it live from completions
+            // But we keep today's spent because that's actual redemptions
+            starData.totalEarned = data.totalEarned - todayEarned;
+            starData.totalSpent = data.totalSpent;
+            starData.days = data.days || [];
+            starData.version = data.version || 0;
+            setSyncStatus('connected');
         }
-    } catch(e) { console.error('loadBank failed:', e); }
+    } catch(e) {
+        console.error('loadAllStars failed:', e);
+        setSyncStatus('error');
+    }
 }
 
-// ---- sync: completions ----
-function syncCompletions(doneList, todayTasks) {
-    try {
-        const starsEarned = calculateTodayStars(todayTasks, doneList);
-        postToSync({
-            secret: CONFIG.syncSecret,
-            action: 'save_progress',
-            date: todayKey(),
-            completions: doneList,
-            starsEarned: starsEarned
-        }).catch(e => console.error('syncCompletions failed:', e));
-    } catch(e) {}
-}
-
+// ---- sync: load today's completions from server ----
 async function restoreCompletionsFromSync() {
     try {
         const data = await getFromSync('type=progress&date=' + todayKey());
@@ -846,9 +464,26 @@ async function restoreCompletionsFromSync() {
     } catch(e) { console.error('restoreCompletions failed:', e); }
 }
 
+// ---- sync: save completions + stars for today ----
+function syncCompletions(doneList, todayTasks) {
+    try {
+        const starsEarned = calculateTodayStars(todayTasks, doneList);
+        postToSync({
+            secret: CONFIG.syncSecret,
+            action: 'save_progress',
+            date: todayKey(),
+            completions: doneList,
+            starsEarned: starsEarned
+        }).then(resp => {
+            if (resp && resp.version) starData.version = resp.version;
+        }).catch(e => console.error('syncCompletions failed:', e));
+    } catch(e) {}
+}
+
 // ---- sync: redeem ----
 async function syncRedeem(cost, rewardName) {
     try {
+        setSyncStatus('syncing');
         const data = await postToSync({
             secret: CONFIG.syncSecret,
             action: 'redeem',
@@ -856,45 +491,73 @@ async function syncRedeem(cost, rewardName) {
             cost: cost,
             rewardName: rewardName
         });
-        if (data && typeof data.totalSpent === 'number') {
-            bank.totalSpent = data.totalSpent;
-        } else if (data && data.error) {
-            console.error('Redeem error:', data.error);
-        }
+        if (data && data.version) starData.version = data.version;
+        // Reload all stars to get accurate totals
+        await loadAllStars();
+        setSyncStatus('connected');
     } catch(e) {
         console.error('syncRedeem failed:', e);
+        setSyncStatus('error');
     }
 }
 
-// ---- sync: adjust bank ----
-async function syncAdjustBank(newBanked) {
+// ---- sync: edit a specific day's stars ----
+async function syncEditStars(date, newStarsEarned) {
     try {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yKey = yesterday.toISOString().slice(0,10);
+        setSyncStatus('syncing');
         const data = await postToSync({
             secret: CONFIG.syncSecret,
-            action: 'adjust_bank',
-            bankedStars: newBanked,
-            lastBankedDate: yKey
+            action: 'edit_stars',
+            date: date,
+            starsEarned: newStarsEarned
         });
         if (data && data.status === 'ok') {
-            bank.bankedStars = newBanked;
-            // Verify by re-reading from server
-            await loadBankFromSync();
-            if (bank.bankedStars !== newBanked) {
-                alert('Warning: Server returned ' + bank.bankedStars + ' instead of ' + newBanked + '. Check the Bank tab in your Google Sheet.');
-            }
+            // Reload all stars to get accurate totals
+            await loadAllStars();
+            setSyncStatus('connected');
+            return true;
         } else {
-            alert('Failed to save stars. Server response: ' + JSON.stringify(data));
+            alert('Failed to save. Response: ' + JSON.stringify(data));
+            setSyncStatus('error');
+            return false;
         }
     } catch(e) {
-        alert('Failed to save stars. Error: ' + e.message);
-        console.error('syncAdjustBank failed:', e);
+        alert('Failed to save. Error: ' + e.message);
+        setSyncStatus('error');
+        return false;
     }
 }
 
-// ---- google sheets ----
+// ---- sync: version polling for cross-device refresh ----
+let pollTimer = null;
+
+async function checkVersion() {
+    try {
+        const data = await getFromSync('type=version');
+        if (data && data.version && data.version !== starData.version) {
+            console.log('Version changed:', starData.version, '->', data.version);
+            starData.version = data.version;
+            await Promise.all([loadAllStars(), restoreCompletionsFromSync()]);
+            // Re-render current view
+            if (currentView === 'main') showMain();
+            else if (currentView === 'history') showHistory();
+        }
+    } catch(e) { /* silent */ }
+}
+
+function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(checkVersion, 15000); // every 15 seconds
+}
+
+function setSyncStatus(status) {
+    const dot = document.getElementById('syncDot');
+    if (dot) {
+        dot.className = 'sync-dot ' + status;
+    }
+}
+
+// ---- google sheets CSV ----
 async function fetchCSV(sheetId, tab) {
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
     const r = await fetch(url);
@@ -921,14 +584,7 @@ function parseTasks(csv) {
     for (let i=1;i<lines.length;i++) {
         const c = csvLine(lines[i]);
         if (c.length>=2 && c[0].trim()) {
-            out.push({
-                id: i,
-                name: c[0].trim(),
-                days: c[1].trim(),
-                emoji: (c[2]||'').trim()||'✅',
-                section: (c[3]||'').trim()||'Tasks',
-                stars: parseInt(c[4])||1
-            });
+            out.push({ id: i, name: c[0].trim(), days: c[1].trim(), emoji: (c[2]||'').trim()||'✅', section: (c[3]||'').trim()||'Tasks', stars: parseInt(c[4])||1 });
         }
     }
     return out;
@@ -941,12 +597,7 @@ function parseRewards(csv) {
     for (let i=1;i<lines.length;i++) {
         const c = csvLine(lines[i]);
         if (c.length>=2 && c[0].trim()) {
-            out.push({
-                name: c[0].trim(),
-                cost: parseInt(c[1])||0,
-                emoji: (c[2]||'').trim()||'🎁',
-                tier: (c[3]||'').trim()||'Reward'
-            });
+            out.push({ name: c[0].trim(), cost: parseInt(c[1])||0, emoji: (c[2]||'').trim()||'🎁', tier: (c[3]||'').trim()||'Reward' });
         }
     }
     return out;
@@ -957,21 +608,14 @@ async function fetchAll(sheetId) {
         fetchCSV(sheetId, 'Tasks'),
         fetchCSV(sheetId, 'Rewards').catch(()=>null)
     ]);
-    const tasks = parseTasks(taskCSV);
-    const rewards = rewardCSV ? parseRewards(rewardCSV) : [];
-    return { tasks, rewards };
+    return { tasks: parseTasks(taskCSV), rewards: rewardCSV ? parseRewards(rewardCSV) : [] };
 }
 
 // ---- icons ----
 const checkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 const gearSVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`;
 
-const sectionIcons = {
-    'morning': '☀️',
-    'after school': '📚',
-    'extracurriculars': '🏅',
-    'evening': '🌙',
-};
+const sectionIcons = { 'morning': '☀️', 'after school': '📚', 'extracurriculars': '🏅', 'evening': '🌙' };
 
 // ---- confetti ----
 function launchConfetti() {
@@ -980,11 +624,9 @@ function launchConfetti() {
         setTimeout(()=>{
             const p=document.createElement('div');
             p.className='confetti-piece';
-            p.style.left=Math.random()*100+'vw';
-            p.style.top='-12px';
+            p.style.left=Math.random()*100+'vw'; p.style.top='-12px';
             p.style.background=cols[Math.floor(Math.random()*cols.length)];
-            p.style.width=(Math.random()*8+6)+'px';
-            p.style.height=(Math.random()*8+6)+'px';
+            p.style.width=(Math.random()*8+6)+'px'; p.style.height=(Math.random()*8+6)+'px';
             p.style.animationDuration=(Math.random()*2+2.5)+'s';
             document.body.appendChild(p);
             setTimeout(()=>p.remove(),4500);
@@ -1007,23 +649,21 @@ function floatStar(el, amount) {
 const app = document.getElementById('app');
 let rewardsOpen = false;
 
-// -- Main --
 async function showMain() {
+    currentView = 'main';
     const di = dayInfo();
     const ov = loadOverrides();
-    const done = loadDone();
 
-    // Show loading with current star count
     app.innerHTML = `
     <div class="main-screen">
         <div class="header">
             <h1>${CONFIG.kidName}'s Day</h1>
             <div class="date">${di.display}</div>
-            <div class="star-counter" id="starCounter">⭐ loading…</div>
+            <div class="star-counter" id="starCounter">⭐ loading...</div>
             ${ov.noSchool ? '<div class="override-banner">📅 No school today</div>' : ''}
             ${ov.summer ? '<div class="override-banner">☀️ Summer break mode</div>' : ''}
         </div>
-        <div class="loading"><div class="spinner"></div>Loading your day…</div>
+        <div class="loading"><div class="spinner"></div>Loading your day...</div>
         <button class="fab-settings" id="fabSettings">${gearSVG}</button>
     </div>`;
     document.getElementById('fabSettings').addEventListener('click', ()=>openSheet());
@@ -1076,15 +716,11 @@ async function showMain() {
 function renderDay(di, ov, tasks, rewards) {
     const done = loadDone();
     const todayStars = calculateTodayStars(tasks, done);
-    const avail = bank.bankedStars + todayStars - bank.totalSpent;
+    const avail = starData.totalEarned + todayStars - starData.totalSpent;
 
-    // Group by section
     const sections = [];
     const seen = new Set();
-    tasks.forEach(t => {
-        const s = t.section;
-        if (!seen.has(s)) { seen.add(s); sections.push(s); }
-    });
+    tasks.forEach(t => { const s = t.section; if (!seen.has(s)) { seen.add(s); sections.push(s); } });
 
     const nDone = tasks.filter(t=>done.includes(t.id)).length;
     const nTotal = tasks.length;
@@ -1110,34 +746,24 @@ function renderDay(di, ov, tasks, rewards) {
         </div>`;
     }).join('');
 
-    // Rewards display
     let rewardsHTML = '';
     if (rewards.length > 0) {
-        const tiers = [];
-        const tierSeen = new Set();
+        const tiers = []; const tierSeen = new Set();
         rewards.forEach(r => { if (!tierSeen.has(r.tier)) { tierSeen.add(r.tier); tiers.push(r.tier); } });
-
         const tierBlocks = tiers.map(tier => {
             const items = rewards.filter(r=>r.tier===tier);
             const cost = items[0]?.cost || 0;
             const canAfford = avail >= cost;
-            const chips = items.map(r =>
-                `<span class="reward-chip ${canAfford?'affordable':''}">${r.emoji} ${r.name}</span>`
-            ).join('');
+            const chips = items.map(r => `<span class="reward-chip ${canAfford?'affordable':''}">${r.emoji} ${r.name}</span>`).join('');
             return `<div class="reward-tier">
-                <div class="tier-header">
-                    <span class="tier-name">${tier}</span>
-                    <span class="tier-cost ${canAfford?'affordable':''}">${cost} ⭐</span>
-                </div>
+                <div class="tier-header"><span class="tier-name">${tier}</span><span class="tier-cost ${canAfford?'affordable':''}">${cost} ⭐</span></div>
                 <div class="tier-items">${chips}</div>
             </div>`;
         }).join('');
-
         rewardsHTML = `
         <div class="rewards-section">
             <div class="rewards-header" id="rewardsToggle">
-                <span class="emoji">🏆</span>
-                <span class="label">Rewards</span>
+                <span class="emoji">🏆</span><span class="label">Rewards</span>
                 <span class="toggle-arrow ${rewardsOpen?'open':''}">▼</span>
             </div>
             <div class="rewards-body ${rewardsOpen?'open':''}" id="rewardsBody">${tierBlocks}</div>
@@ -1178,7 +804,6 @@ function renderDay(di, ov, tasks, rewards) {
         <div class="sheet-content" id="sheetContent"></div>
     </div>`;
 
-    // Events
     document.getElementById('fabMain').addEventListener('click', ()=>openSheet());
     document.getElementById('backdrop').addEventListener('click', closeSheet);
 
@@ -1186,14 +811,11 @@ function renderDay(di, ov, tasks, rewards) {
     if (rewardsToggle) {
         rewardsToggle.addEventListener('click', () => {
             rewardsOpen = !rewardsOpen;
-            const body = document.getElementById('rewardsBody');
-            const arrow = rewardsToggle.querySelector('.toggle-arrow');
-            body.classList.toggle('open', rewardsOpen);
-            arrow.classList.toggle('open', rewardsOpen);
+            document.getElementById('rewardsBody').classList.toggle('open', rewardsOpen);
+            rewardsToggle.querySelector('.toggle-arrow').classList.toggle('open', rewardsOpen);
         });
     }
 
-    // Task tap handlers
     $$('.task-card').forEach(card => {
         card.addEventListener('click', function() {
             const id = Number(this.dataset.id);
@@ -1209,21 +831,14 @@ function renderDay(di, ov, tasks, rewards) {
                 floatStar(this, taskStars);
             }
 
-            // Save completions to localStorage
             saveDoneList(newDone);
-
-            // Sync completions + starsEarned to server (fire-and-forget)
             syncCompletions(newDone, tasks);
-
-            // Re-render with recalculated stars
             renderDay(di, ov, tasks, rewards);
 
-            // Confetti if just completed all
             if (!wasDone && newDone.length === tasks.length) {
                 setTimeout(launchConfetti, 300);
             }
 
-            // Bounce star counter
             const counter = document.getElementById('starCounter');
             if (counter) { counter.classList.remove('bounce'); void counter.offsetWidth; counter.classList.add('bounce'); }
         });
@@ -1236,7 +851,7 @@ function openSheet() {
     const done = loadDone();
     const todayTasks = (cached('tasks') || []).filter(t => matchesDay(t.days, dayInfo(), ov));
     const todayStars = calculateTodayStars(todayTasks, done);
-    const avail = bank.bankedStars + todayStars - bank.totalSpent;
+    const avail = starData.totalEarned + todayStars - starData.totalSpent;
     const rewards = cached('rewards') || [];
 
     const redeemItems = rewards.map(r => {
@@ -1257,15 +872,11 @@ function openSheet() {
         <div class="sheet-section-label">Schedule</div>
         <div class="md-switch">
             <label>No school today</label>
-            <div class="md-switch-track ${ov.noSchool?'on':''}" id="togNoSchool">
-                <div class="md-switch-thumb"></div>
-            </div>
+            <div class="md-switch-track ${ov.noSchool?'on':''}" id="togNoSchool"><div class="md-switch-thumb"></div></div>
         </div>
         <div class="md-switch">
             <label>Summer break</label>
-            <div class="md-switch-track ${ov.summer?'on':''}" id="togSummer">
-                <div class="md-switch-thumb"></div>
-            </div>
+            <div class="md-switch-track ${ov.summer?'on':''}" id="togSummer"><div class="md-switch-thumb"></div></div>
         </div>
 
         <div class="sheet-divider"></div>
@@ -1274,12 +885,11 @@ function openSheet() {
         <div class="star-summary">
             <div class="star-num">⭐ ${avail} available</div>
             <div class="star-breakdown">
-                <span>🏦 Banked: ${bank.bankedStars}</span>
-                <span>📅 Today: ${todayStars}</span>
-                <span>🎁 Spent: ${bank.totalSpent}</span>
+                <span>📊 All-time earned: ${starData.totalEarned + todayStars}</span>
+                <span>🎁 All-time spent: ${starData.totalSpent}</span>
+                <span>📅 Today: +${todayStars}</span>
             </div>
         </div>
-        <button class="md-btn md-btn-outline md-btn-full" id="btnAdjustStars" style="margin-bottom:16px">✏️ Adjust Stars</button>
 
         ${rewards.length > 0 ? `
         <div class="sheet-section-label">Redeem a Reward</div>
@@ -1288,235 +898,274 @@ function openSheet() {
 
         <div class="sheet-divider"></div>
 
-        <div class="sheet-section-label">Star Sync</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <span style="width:10px;height:10px;border-radius:50%;background:${CONFIG.syncUrl ? 'var(--md-success)' : 'var(--md-outline)'};flex-shrink:0"></span>
-            <span style="font-size:14px;color:${CONFIG.syncUrl ? 'var(--md-success)' : 'var(--md-on-surface-variant)'};font-weight:500">${CONFIG.syncUrl ? 'Connected' : 'Not set up'}</span>
-        </div>
-        ${CONFIG.syncUrl ? '<button class="md-btn md-btn-tonal md-btn-full" id="btnSyncNow" style="margin-bottom:10px">☁️ Sync stars now</button>' : ''}
-
-        <div class="sheet-divider"></div>
-
-        <button class="md-btn md-btn-tonal md-btn-full" id="btnHistory" style="margin-bottom:10px">📅 View History</button>
+        <button class="md-btn md-btn-tonal md-btn-full" id="btnHistory" style="margin-bottom:10px">📅 View & Edit Star History</button>
+        <button class="md-btn md-btn-tonal md-btn-full" id="btnSyncNow" style="margin-bottom:10px">☁️ Sync Now</button>
         <button class="md-btn md-btn-tonal md-btn-full" id="btnRefreshSheet" style="margin-bottom:10px">↻ Refresh from Google Sheet</button>
         <button class="md-btn md-btn-text md-btn-full md-btn-danger" id="btnResetStars">Reset All Stars</button>
     `;
 
-    // Toggle events
     document.getElementById('togNoSchool').addEventListener('click', function() {
         const o = loadOverrides();
         o.noSchool = !o.noSchool;
         o.noSchoolDate = o.noSchool ? todayKey() : null;
         saveOverrides(o);
-        closeSheet();
-        showMain();
+        closeSheet(); showMain();
     });
     document.getElementById('togSummer').addEventListener('click', function() {
         const o = loadOverrides();
         o.summer = !o.summer;
         saveOverrides(o);
-        closeSheet();
-        showMain();
+        closeSheet(); showMain();
     });
 
-    // Adjust stars
-    document.getElementById('btnAdjustStars').addEventListener('click', async function() {
-        const val = prompt('Enter the correct banked star total:', bank.bankedStars);
-        if (val === null) return;
-        const num = parseInt(val);
-        if (isNaN(num) || num < 0) { alert('Please enter a valid number.'); return; }
-        await syncAdjustBank(num);
-        closeSheet();
-        showMain();
-    });
-
-    // Redeem events
     $$('.redeem-btn.can-afford').forEach(btn => {
         btn.addEventListener('click', async function() {
             const cost = Number(this.dataset.cost);
             const name = this.dataset.name;
             if (confirm(`Redeem "${name}" for ${cost} stars?`)) {
-                // Optimistic update in case server is slow
-                bank.totalSpent += cost;
-                closeSheet();
-                showMain();
-                // Sync to server (updates bank.totalSpent with server value)
+                starData.totalSpent += cost;
+                closeSheet(); showMain();
                 await syncRedeem(cost, name);
+                showMain();
             }
         });
     });
 
-    const btnSync = document.getElementById('btnSyncNow');
-    if (btnSync) {
-        btnSync.addEventListener('click', async ()=>{
-            btnSync.textContent = '⏳ Syncing…';
-            try {
-                // Push current completions to server
-                const done = loadDone();
-                const tt = (cached('tasks') || []).filter(t => matchesDay(t.days, dayInfo(), loadOverrides()));
-                await postToSync({
-                    secret: CONFIG.syncSecret,
-                    action: 'save_progress',
-                    date: todayKey(),
-                    completions: done,
-                    starsEarned: calculateTodayStars(tt, done)
-                });
-                // Pull latest bank + completions from server
-                await Promise.all([loadBankFromSync(), restoreCompletionsFromSync()]);
-                btnSync.textContent = '✓ Synced!';
-            } catch(e) {
-                btnSync.textContent = '✗ Failed';
-                console.error('Sync failed:', e);
-            }
-            setTimeout(()=>{ closeSheet(); showMain(); }, 800);
-        });
-    }
+    document.getElementById('btnSyncNow').addEventListener('click', async function() {
+        this.textContent = '⏳ Syncing...';
+        try {
+            const done = loadDone();
+            const tt = (cached('tasks') || []).filter(t => matchesDay(t.days, dayInfo(), loadOverrides()));
+            await postToSync({
+                secret: CONFIG.syncSecret,
+                action: 'save_progress',
+                date: todayKey(),
+                completions: done,
+                starsEarned: calculateTodayStars(tt, done)
+            });
+            await Promise.all([loadAllStars(), restoreCompletionsFromSync()]);
+            this.textContent = '✓ Synced!';
+        } catch(e) {
+            this.textContent = '✗ Failed';
+        }
+        setTimeout(()=>{ closeSheet(); showMain(); }, 800);
+    });
 
-    document.getElementById('btnHistory').addEventListener('click', ()=>{ showHistory(); });
+    document.getElementById('btnHistory').addEventListener('click', ()=>showHistory());
     document.getElementById('btnRefreshSheet').addEventListener('click', ()=>{ closeSheet(); showMain(); });
     document.getElementById('btnResetStars').addEventListener('click', async ()=>{
         if (confirm('Reset ALL stars to zero? This cannot be undone.')) {
             try {
-                const data = await postToSync({secret: CONFIG.syncSecret, action: 'reset_stars'});
-                if (data && data.status === 'ok') {
-                    bank.bankedStars = 0;
-                    bank.totalSpent = 0;
-                }
+                await postToSync({secret: CONFIG.syncSecret, action: 'reset_stars'});
+                starData = { totalEarned: 0, totalSpent: 0, days: [], version: 0 };
             } catch(e) { console.error('resetStars failed:', e); }
-            closeSheet();
-            showMain();
+            closeSheet(); showMain();
         }
     });
 
-    // Animate open
     document.getElementById('backdrop').classList.add('open');
     document.getElementById('bottomSheet').classList.add('open');
 }
 
+// ---- History with per-day editing ----
 async function showHistory() {
     closeSheet();
+    currentView = 'history';
     const allTasks = cached('tasks') || [];
     const ov = loadOverrides();
 
     app.innerHTML = `
     <div class="history-screen">
         <button class="history-back" id="histBack">← Back</button>
-        <div class="history-title">History</div>
-        <div class="history-loading"><div class="spinner"></div>Loading history…</div>
+        <div class="history-title">Star History</div>
+        <div class="history-loading"><div class="spinner"></div>Loading history...</div>
     </div>`;
-    document.getElementById('histBack').addEventListener('click', showMain);
+    document.getElementById('histBack').addEventListener('click', ()=>{ currentView='main'; showMain(); });
 
-    let history;
+    let allStarsData;
     try {
-        history = await getFromSync('type=history');
-        if (!history) throw new Error('No data');
+        allStarsData = await getFromSync('type=all_stars');
+        if (!allStarsData || !allStarsData.days) throw new Error('No data');
     } catch {
         app.innerHTML = `
         <div class="history-screen">
             <button class="history-back" id="histBack2">← Back</button>
-            <div class="history-title">History</div>
+            <div class="history-title">Star History</div>
             <div class="history-empty">Couldn't load history. Check your connection.</div>
         </div>`;
-        document.getElementById('histBack2').addEventListener('click', showMain);
+        document.getElementById('histBack2').addEventListener('click', ()=>{ currentView='main'; showMain(); });
         return;
     }
 
-    let days = [];
-    if (Array.isArray(history)) {
-        days = history;
-    } else if (history && Array.isArray(history.days)) {
-        days = history.days;
+    // Also get history for completions detail
+    let historyData;
+    try {
+        historyData = await getFromSync('type=history');
+    } catch { historyData = null; }
+
+    let completionsMap = {};
+    if (historyData && historyData.days) {
+        historyData.days.forEach(d => { completionsMap[d.date] = d.completions || []; });
     }
 
+    let days = allStarsData.days || [];
     days.sort((a,b) => b.date.localeCompare(a.date));
-    days = days.filter(d => d.completions && d.completions.length > 0);
+
+    // Summary card
+    const totalE = allStarsData.totalEarned || 0;
+    const totalS = allStarsData.totalSpent || 0;
+    const totalAvail = totalE - totalS;
 
     if (days.length === 0) {
         app.innerHTML = `
         <div class="history-screen">
             <button class="history-back" id="histBack3">← Back</button>
-            <div class="history-title">History</div>
+            <div class="history-title">Star History</div>
+            <div class="star-summary" style="margin:0 0 16px">
+                <div class="star-num">⭐ ${totalAvail} available</div>
+                <div class="star-breakdown">
+                    <span>Total earned: ${totalE}</span>
+                    <span>Total spent: ${totalS}</span>
+                </div>
+            </div>
             <div class="history-empty">No history yet. Complete some tasks first!</div>
         </div>`;
-        document.getElementById('histBack3').addEventListener('click', showMain);
+        document.getElementById('histBack3').addEventListener('click', ()=>{ currentView='main'; showMain(); });
         return;
     }
 
     const dayCards = days.map((day, idx) => {
-        const di = dayInfoFor(day.date);
-        const pastOv = {noSchool: false, summer: ov.summer};
-        const dayTasks = allTasks.filter(t => matchesDay(t.days, di, pastOv));
-        const completedIds = day.completions || [];
-        const nDone = dayTasks.filter(t => completedIds.includes(t.id)).length;
-        const nTotal = dayTasks.length;
-        const starsEarned = calculateTodayStars(dayTasks, completedIds);
+        const dateStr = day.date || '';
+        // Skip non-date entries (like "banked" from old system)
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return '';
 
-        const taskList = dayTasks.map(t => {
-            const done = completedIds.includes(t.id);
-            return `<div class="history-task ${done ? '' : 'incomplete'}">
-                <span class="ht-emoji">${t.emoji}</span>
-                <span class="ht-name">${t.name}</span>
-                <span class="ht-check">${done ? '✅' : '⬜'}</span>
-            </div>`;
-        }).join('');
+        let displayDate;
+        try { displayDate = dayInfoFor(dateStr).display; } catch { displayDate = dateStr; }
+
+        const earned = day.starsEarned || 0;
+        const spent = day.starsSpent || 0;
+        const completions = completionsMap[dateStr] || [];
+        const nDone = completions.length;
+
+        // Build task detail if we have completions
+        let taskList = '';
+        if (nDone > 0) {
+            const di = dayInfoFor(dateStr);
+            const pastOv = {noSchool: false, summer: ov.summer};
+            const dayTasks = allTasks.filter(t => matchesDay(t.days, di, pastOv));
+            taskList = dayTasks.map(t => {
+                const done = completions.includes(t.id);
+                return `<div class="history-task ${done ? '' : 'incomplete'}">
+                    <span class="ht-emoji">${t.emoji}</span>
+                    <span class="ht-name">${t.name}</span>
+                    <span class="ht-check">${done ? '✅' : '⬜'}</span>
+                </div>`;
+            }).join('');
+        }
+
+        const isToday = dateStr === todayKey();
 
         return `<div class="history-day">
             <div class="history-day-header" data-idx="${idx}">
-                <div class="history-day-date">${di.display}</div>
+                <div class="history-day-date">${displayDate}${isToday ? ' (today)' : ''}</div>
                 <div class="history-day-stats">
-                    <span class="stat-done">${nDone}/${nTotal}</span>
-                    <span class="stat-stars">⭐ ${starsEarned}</span>
+                    ${nDone > 0 ? `<span class="stat-done">${nDone} done</span>` : ''}
+                    <span class="stat-stars">⭐ ${earned}${spent > 0 ? ' · -' + spent + ' spent' : ''}</span>
                 </div>
                 <span class="history-day-arrow" id="arrow-${idx}">▼</span>
             </div>
-            <div class="history-day-body" id="body-${idx}">${taskList}</div>
+            <div class="history-day-body" id="body-${idx}">
+                ${taskList}
+                <button class="edit-stars-btn" data-date="${dateStr}" data-earned="${earned}">✏️ Edit stars for this day</button>
+            </div>
         </div>`;
-    }).join('');
+    }).filter(Boolean).join('');
 
     app.innerHTML = `
     <div class="history-screen">
         <button class="history-back" id="histBack4">← Back</button>
-        <div class="history-title">History</div>
+        <div class="history-title">Star History</div>
+        <div class="star-summary" style="margin:0 0 16px">
+            <div class="star-num">⭐ ${totalAvail} available</div>
+            <div class="star-breakdown">
+                <span>Total earned: ${totalE}</span>
+                <span>Total spent: ${totalS}</span>
+            </div>
+        </div>
         ${dayCards}
+        <button class="md-btn md-btn-outline md-btn-full" id="btnAddDay" style="margin-top:16px">+ Add/Edit a Day Manually</button>
     </div>`;
 
-    document.getElementById('histBack4').addEventListener('click', showMain);
+    document.getElementById('histBack4').addEventListener('click', ()=>{ currentView='main'; showMain(); });
 
+    // Expand/collapse
     document.querySelectorAll('.history-day-header').forEach(hdr => {
         hdr.addEventListener('click', function() {
             const i = this.dataset.idx;
-            const body = document.getElementById('body-' + i);
-            const arrow = document.getElementById('arrow-' + i);
-            body.classList.toggle('open');
-            arrow.classList.toggle('open');
+            document.getElementById('body-' + i).classList.toggle('open');
+            document.getElementById('arrow-' + i).classList.toggle('open');
         });
+    });
+
+    // Edit stars buttons
+    document.querySelectorAll('.edit-stars-btn').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            const date = this.dataset.date;
+            const current = this.dataset.earned;
+            const val = prompt(`Edit stars earned for ${date}:`, current);
+            if (val === null) return;
+            const num = parseInt(val);
+            if (isNaN(num) || num < 0) { alert('Please enter a valid number.'); return; }
+            this.textContent = '⏳ Saving...';
+            const ok = await syncEditStars(date, num);
+            if (ok) {
+                showHistory(); // Re-render with new data
+            } else {
+                this.textContent = '✏️ Edit stars for this day';
+            }
+        });
+    });
+
+    // Add manual day
+    document.getElementById('btnAddDay').addEventListener('click', async function() {
+        const date = prompt('Enter date (YYYY-MM-DD):', todayKey());
+        if (!date) return;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { alert('Please use YYYY-MM-DD format.'); return; }
+        const stars = prompt('Enter stars earned for ' + date + ':', '0');
+        if (stars === null) return;
+        const num = parseInt(stars);
+        if (isNaN(num) || num < 0) { alert('Please enter a valid number.'); return; }
+        this.textContent = '⏳ Saving...';
+        const ok = await syncEditStars(date, num);
+        if (ok) {
+            showHistory();
+        } else {
+            this.textContent = '+ Add/Edit a Day Manually';
+        }
     });
 }
 
 function closeSheet() {
-    document.getElementById('backdrop').classList.remove('open');
-    document.getElementById('bottomSheet').classList.remove('open');
+    const backdrop = document.getElementById('backdrop');
+    const sheet = document.getElementById('bottomSheet');
+    if (backdrop) backdrop.classList.remove('open');
+    if (sheet) sheet.classList.remove('open');
 }
 
-// ---- auto-reset at midnight ----
+// ---- midnight reset ----
 function scheduleMidnight() {
     const now = new Date(), next = new Date(now);
     next.setDate(next.getDate()+1); next.setHours(0,0,5,0);
     setTimeout(()=>{ showMain(); scheduleMidnight(); }, next-now);
 }
 
-// ---- background refresh (5 min) ----
-setInterval(()=>{
-    fetchAll(CONFIG.sheetId).then(d=>{ cacheData('tasks',d.tasks); cacheData('rewards',d.rewards); }).catch(()=>{});
-    loadBankFromSync().catch(()=>{});
-    restoreCompletionsFromSync().catch(()=>{});
-}, 5*60*1000);
-
 // ---- boot ----
 (async () => {
-    await Promise.all([loadBankFromSync(), restoreCompletionsFromSync()]);
+    await Promise.all([loadAllStars(), restoreCompletionsFromSync()]);
     showMain();
     scheduleMidnight();
+    startPolling();
 })();
 </script>
 </body>
