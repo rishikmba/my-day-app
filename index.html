@@ -820,8 +820,7 @@ function syncCompletions(doneList, todayTasks) {
         fetch(CONFIG.syncUrl, {
             method: 'POST',
             headers: {'Content-Type': 'text/plain'},
-            body: JSON.stringify(body),
-            mode: 'no-cors'
+            body: JSON.stringify(body)
         }).catch(()=>{});
     } catch(e) {}
 }
@@ -878,14 +877,19 @@ async function syncAdjustBank(newBanked) {
             bankedStars: newBanked,
             lastBankedDate: yKey
         };
-        await fetch(CONFIG.syncUrl, {
+        const r = await fetch(CONFIG.syncUrl, {
             method: 'POST',
             headers: {'Content-Type': 'text/plain'},
-            body: JSON.stringify(body),
-            mode: 'no-cors'
+            body: JSON.stringify(body)
         });
-        bank.bankedStars = newBanked;
-    } catch(e) {}
+        if (r.ok) {
+            bank.bankedStars = newBanked;
+        } else {
+            alert('Failed to save. Please try again.');
+        }
+    } catch(e) {
+        alert('Failed to save. Check your connection.');
+    }
 }
 
 // ---- google sheets ----
@@ -1330,24 +1334,28 @@ function openSheet() {
             const cost = Number(this.dataset.cost);
             const name = this.dataset.name;
             if (confirm(`Redeem "${name}" for ${cost} stars?`)) {
-                // Optimistic update
+                // Optimistic update in case server is slow
                 bank.totalSpent += cost;
-                // Sync to server
-                syncRedeem(cost, name);
                 closeSheet();
                 showMain();
+                // Sync to server (updates bank.totalSpent with server value)
+                await syncRedeem(cost, name);
             }
         });
     });
 
     const btnSync = document.getElementById('btnSyncNow');
     if (btnSync) {
-        btnSync.addEventListener('click', ()=>{
+        btnSync.addEventListener('click', async ()=>{
+            btnSync.textContent = '⏳ Syncing…';
+            // Push current completions to server
             const done = loadDone();
             const tt = (cached('tasks') || []).filter(t => matchesDay(t.days, dayInfo(), loadOverrides()));
             syncCompletions(done, tt);
+            // Pull latest bank + completions from server
+            await Promise.all([loadBankFromSync(), restoreCompletionsFromSync()]);
             btnSync.textContent = '✓ Synced!';
-            setTimeout(()=>{ btnSync.textContent = '☁️ Sync stars now'; }, 2000);
+            setTimeout(()=>{ closeSheet(); showMain(); }, 800);
         });
     }
 
@@ -1355,17 +1363,17 @@ function openSheet() {
     document.getElementById('btnRefreshSheet').addEventListener('click', ()=>{ closeSheet(); showMain(); });
     document.getElementById('btnResetStars').addEventListener('click', async ()=>{
         if (confirm('Reset ALL stars to zero? This cannot be undone.')) {
-            await syncAdjustBank(0);
-            bank.totalSpent = 0;
-            // Also reset spent on server
             try {
                 if (CONFIG.syncUrl) {
-                    fetch(CONFIG.syncUrl, {
+                    const r = await fetch(CONFIG.syncUrl, {
                         method: 'POST',
                         headers: {'Content-Type': 'text/plain'},
-                        body: JSON.stringify({secret: CONFIG.syncSecret, action: 'reset_stars'}),
-                        mode: 'no-cors'
-                    }).catch(()=>{});
+                        body: JSON.stringify({secret: CONFIG.syncSecret, action: 'reset_stars'})
+                    });
+                    if (r.ok) {
+                        bank.bankedStars = 0;
+                        bank.totalSpent = 0;
+                    }
                 }
             } catch(e) {}
             closeSheet();
@@ -1410,11 +1418,8 @@ async function showHistory() {
     let days = [];
     if (Array.isArray(history)) {
         days = history;
-    } else if (history && typeof history === 'object') {
-        days = Object.entries(history).map(([date, val]) => ({
-            date,
-            completions: Array.isArray(val) ? val : (val?.completions || [])
-        }));
+    } else if (history && Array.isArray(history.days)) {
+        days = history.days;
     }
 
     days.sort((a,b) => b.date.localeCompare(a.date));
@@ -1497,6 +1502,8 @@ function scheduleMidnight() {
 // ---- background refresh (5 min) ----
 setInterval(()=>{
     fetchAll(CONFIG.sheetId).then(d=>{ cacheData('tasks',d.tasks); cacheData('rewards',d.rewards); }).catch(()=>{});
+    loadBankFromSync().catch(()=>{});
+    restoreCompletionsFromSync().catch(()=>{});
 }, 5*60*1000);
 
 // ---- boot ----
