@@ -711,6 +711,36 @@ async function restoreStarsFromSync() {
     } catch(e) {}
 }
 
+function syncCompletions(doneList) {
+    try {
+        if (!CONFIG.syncUrl) return;
+        const body = {
+            secret: CONFIG.syncSecret,
+            action: 'save_progress',
+            date: todayKey(),
+            completions: doneList
+        };
+        fetch(CONFIG.syncUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain'},
+            body: JSON.stringify(body),
+            mode: 'no-cors'
+        }).catch(()=>{});
+    } catch(e) {}
+}
+
+async function restoreCompletionsFromSync() {
+    try {
+        if (!CONFIG.syncUrl) return;
+        const r = await fetch(CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret + '&type=progress&date=' + todayKey());
+        if (!r.ok) return;
+        const data = await r.json();
+        if (data && Array.isArray(data.completions)) {
+            saveDoneList(data.completions);
+        }
+    } catch(e) {}
+}
+
 // ---- google sheets ----
 async function fetchCSV(sheetId, tab) {
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
@@ -1029,6 +1059,7 @@ function renderDay(di, ov, tasks, rewards) {
                 saveDoneList(newDone);
                 saveStars(s);
                 syncStars('task_uncomplete', taskName);
+                syncCompletions(newDone);
             } else {
                 newDone = [...currentDone, id];
                 s.earned += taskStars;
@@ -1038,6 +1069,7 @@ function renderDay(di, ov, tasks, rewards) {
                 saveDoneList(newDone);
                 saveStars(s);
                 syncStars('task_complete', taskName);
+                syncCompletions(newDone);
                 if (justFinishedAll) syncStars('bonus', 'All tasks completed');
             }
 
@@ -1197,7 +1229,7 @@ setInterval(()=>{
 
 // ---- boot ----
 (async () => {
-    await restoreStarsFromSync();
+    await Promise.all([restoreStarsFromSync(), restoreCompletionsFromSync()]);
     showMain();
     scheduleMidnight();
 })();
