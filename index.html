@@ -153,77 +153,6 @@
             font-weight: 500;
         }
 
-        /* ===== SETUP SCREEN ===== */
-        .setup-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 32px 20px;
-        }
-        .setup-card {
-            background: var(--md-surface);
-            border-radius: var(--md-shape-xl);
-            padding: 36px 28px;
-            max-width: 480px;
-            width: 100%;
-            box-shadow: var(--md-elevation-3);
-        }
-        .setup-card h1 {
-            font-size: 24px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 4px;
-            color: var(--md-on-surface);
-        }
-        .setup-card .sub {
-            text-align: center;
-            color: var(--md-on-surface-variant);
-            font-size: 14px;
-            margin-bottom: 28px;
-            line-height: 1.5;
-        }
-        .setup-card label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--md-on-surface-variant);
-            margin-bottom: 6px;
-            letter-spacing: 0.03em;
-        }
-        .md-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1.5px solid var(--md-outline);
-            border-radius: var(--md-shape-sm);
-            font-size: 16px;
-            font-family: inherit;
-            margin-bottom: 20px;
-            outline: none;
-            transition: border-color 0.2s;
-            background: var(--md-surface);
-            color: var(--md-on-surface);
-            -webkit-appearance: none;
-        }
-        .md-input:focus { border-color: var(--md-primary); }
-        .setup-help {
-            background: var(--md-surface-container);
-            border-radius: var(--md-shape-md);
-            padding: 16px;
-            margin-bottom: 24px;
-            font-size: 13px;
-            line-height: 1.7;
-            color: var(--md-on-surface-variant);
-        }
-        .setup-help strong { color: var(--md-on-surface); }
-        .setup-help code {
-            background: var(--md-surface-container-high);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
         /* ===== MAIN SCREEN ===== */
         .main-screen {
             min-height: 100vh;
@@ -683,6 +612,13 @@
 const PFX = 'myDay_v3';
 const DAILY_BONUS = 5;
 
+const CONFIG = {
+    kidName: "Krish",
+    sheetId: "1saJjpzAi8sBisf07xU0asxfP5PCm-_-Uou1v4dlAk-8",
+    syncUrl: "https://script.google.com/macros/s/AKfycbzPcK0h9FBfd3qAy1rFa95niNDhXZokOUxNo-JT0TcU8NBVjc2UC1rQzrbRpspjf5EB6A/exec",
+    syncSecret: "N3YR-owVtiuu3jkixUq4xg"
+};
+
 // ---- helpers ----
 const todayKey = () => new Date().toISOString().slice(0,10);
 const $ = sel => document.querySelector(sel);
@@ -715,9 +651,6 @@ function matchesDay(dayStr, di, ov) {
 function load(k,def) { try { return JSON.parse(localStorage.getItem(PFX+'_'+k))||def; } catch { return def; } }
 function save(k,v) { localStorage.setItem(PFX+'_'+k, JSON.stringify(v)); }
 
-function loadConfig()  { return load('cfg', null); }
-function saveConfig(c) { save('cfg', c); }
-
 function loadDone() { const d=load('done',{}); return d[todayKey()]||[]; }
 function saveDoneList(list) { save('done', {[todayKey()]: list}); }
 
@@ -741,11 +674,11 @@ function cached(k) { try { return JSON.parse(localStorage.getItem(PFX+'_cache_'+
 // ---- star sync ----
 function syncStars(action, details) {
     try {
-        const cfg = loadConfig();
-        if (!cfg?.syncUrl) return;
+        if (!CONFIG.syncUrl) return;
         const s = loadStars();
         const now = new Date();
         const body = {
+            secret: CONFIG.syncSecret,
             date: todayKey(),
             time: now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}),
             action: action,
@@ -754,7 +687,7 @@ function syncStars(action, details) {
             spent: s.spent,
             available: s.earned - s.spent
         };
-        fetch(cfg.syncUrl, {
+        fetch(CONFIG.syncUrl, {
             method: 'POST',
             headers: {'Content-Type': 'text/plain'},
             body: JSON.stringify(body),
@@ -765,9 +698,8 @@ function syncStars(action, details) {
 
 async function restoreStarsFromSync() {
     try {
-        const cfg = loadConfig();
-        if (!cfg?.syncUrl) return;
-        const r = await fetch(cfg.syncUrl);
+        if (!CONFIG.syncUrl) return;
+        const r = await fetch(CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret);
         if (!r.ok) return;
         const data = await r.json();
         if (data && typeof data.earned === 'number') {
@@ -780,11 +712,6 @@ async function restoreStarsFromSync() {
 }
 
 // ---- google sheets ----
-function extractId(input) {
-    const m = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-    return m ? m[1] : input.trim();
-}
-
 async function fetchCSV(sheetId, tab) {
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
     const r = await fetch(url);
@@ -897,43 +824,8 @@ function floatStar(el, amount) {
 const app = document.getElementById('app');
 let rewardsOpen = false;
 
-// -- Setup --
-function showSetup() {
-    const cfg = loadConfig();
-    app.innerHTML = `
-    <div class="setup-screen">
-        <div class="setup-card">
-            <h1>📋 My Day</h1>
-            <p class="sub">Connect your Google Sheet to get started.</p>
-            <label>KID'S NAME</label>
-            <input class="md-input" type="text" id="fName" placeholder="e.g. Alex" value="${cfg?.kidName||''}">
-            <label>GOOGLE SHEET URL OR ID</label>
-            <input class="md-input" type="text" id="fSheet" placeholder="Paste the full URL or just the ID" value="${cfg?.sheetUrl||''}">
-            <label>STAR SYNC URL (OPTIONAL)</label>
-            <input class="md-input" type="text" id="fSync" placeholder="https://script.google.com/macros/s/AKfycbzrWi8qwMz_ElsphsCcwXs86mlsON56oai5L9jaaUDPR5R9Dgo0FmZ6fLB6Ac-mleYtkA/exec" value="${cfg?.syncUrl||''}">
-            <div class="setup-help">
-                <strong>How to connect:</strong><br>
-                1. Open the Google Sheet on your phone<br>
-                2. Tap <strong>Share</strong> → set to <strong>"Anyone with the link"</strong> → <strong>Viewer</strong><br>
-                3. Copy the link and paste it above
-            </div>
-            <button class="md-btn md-btn-filled md-btn-full" id="btnGo">Save &amp; Start</button>
-        </div>
-    </div>`;
-    document.getElementById('btnGo').addEventListener('click', ()=>{
-        const name=document.getElementById('fName').value.trim();
-        const raw=document.getElementById('fSheet').value.trim();
-        if (!name||!raw) { alert('Please fill in both fields.'); return; }
-        const sync=document.getElementById('fSync').value.trim();
-        saveConfig({kidName:name, sheetId:extractId(raw), sheetUrl:raw, syncUrl:sync});
-        showMain();
-    });
-}
-
 // -- Main --
 async function showMain() {
-    const cfg = loadConfig();
-    if (!cfg) { showSetup(); return; }
     const di = dayInfo();
     const ov = loadOverrides();
     const stars = loadStars();
@@ -942,7 +834,7 @@ async function showMain() {
     app.innerHTML = `
     <div class="main-screen">
         <div class="header">
-            <h1>${cfg.kidName}'s Day</h1>
+            <h1>${CONFIG.kidName}'s Day</h1>
             <div class="date">${di.display}</div>
             <div class="star-counter" id="starCounter">⭐ ${avail} stars</div>
             ${ov.noSchool ? '<div class="override-banner">📅 No school today</div>' : ''}
@@ -951,11 +843,11 @@ async function showMain() {
         <div class="loading"><div class="spinner"></div>Loading your day…</div>
         <button class="fab-settings" id="fabSettings">${gearSVG}</button>
     </div>`;
-    document.getElementById('fabSettings').addEventListener('click', ()=>openSheet(cfg));
+    document.getElementById('fabSettings').addEventListener('click', ()=>openSheet());
 
     let data;
     try {
-        data = await fetchAll(cfg.sheetId);
+        data = await fetchAll(CONFIG.sheetId);
         cacheData('tasks', data.tasks);
         cacheData('rewards', data.rewards);
     } catch {
@@ -963,17 +855,14 @@ async function showMain() {
         if (!ct) {
             app.innerHTML = `
             <div class="main-screen">
-                <div class="header"><h1>${cfg.kidName}'s Day</h1><div class="date">${di.display}</div></div>
+                <div class="header"><h1>${CONFIG.kidName}'s Day</h1><div class="date">${di.display}</div></div>
                 <div class="error-card">
                     <h3>Couldn't load tasks</h3>
                     <p>Check your Wi-Fi and make sure the Google Sheet is shared as "Anyone with the link."</p>
                     <button class="md-btn md-btn-filled" id="btnRetry">Try Again</button>
-                    <br><br>
-                    <button class="md-btn md-btn-outline" id="btnSetup2">Settings</button>
                 </div>
             </div>`;
             document.getElementById('btnRetry').addEventListener('click', showMain);
-            document.getElementById('btnSetup2').addEventListener('click', showSetup);
             return;
         }
         data = { tasks: ct, rewards: cached('rewards')||[] };
@@ -984,7 +873,7 @@ async function showMain() {
     if (todayTasks.length === 0) {
         app.innerHTML = `
         <div class="main-screen">
-            <div class="header"><h1>${cfg.kidName}'s Day</h1><div class="date">${di.display}</div>
+            <div class="header"><h1>${CONFIG.kidName}'s Day</h1><div class="date">${di.display}</div>
             <div class="star-counter">⭐ ${avail} stars</div></div>
             <div class="no-chores">
                 <span class="big-emoji">🎉</span>
@@ -993,14 +882,14 @@ async function showMain() {
             </div>
             <button class="fab-settings" id="fabS2">${gearSVG}</button>
         </div>`;
-        document.getElementById('fabS2').addEventListener('click',()=>openSheet(cfg));
+        document.getElementById('fabS2').addEventListener('click',()=>openSheet());
         return;
     }
 
-    renderDay(cfg, di, ov, todayTasks, data.rewards);
+    renderDay(di, ov, todayTasks, data.rewards);
 }
 
-function renderDay(cfg, di, ov, tasks, rewards) {
+function renderDay(di, ov, tasks, rewards) {
     const done = loadDone();
     const stars = loadStars();
     const avail = stars.earned - stars.spent;
@@ -1084,7 +973,7 @@ function renderDay(cfg, di, ov, tasks, rewards) {
     app.innerHTML = `
     <div class="main-screen">
         <div class="header">
-            <h1>${cfg.kidName}'s Day</h1>
+            <h1>${CONFIG.kidName}'s Day</h1>
             <div class="date">${di.display}</div>
             <div class="star-counter" id="starCounter">⭐ ${avail} stars</div>
             ${ov.noSchool ? '<div class="override-banner">📅 No school today</div>' : ''}
@@ -1106,7 +995,7 @@ function renderDay(cfg, di, ov, tasks, rewards) {
     </div>`;
 
     // Events
-    document.getElementById('fabMain').addEventListener('click', ()=>openSheet(cfg));
+    document.getElementById('fabMain').addEventListener('click', ()=>openSheet());
     document.getElementById('backdrop').addEventListener('click', closeSheet);
 
     const rewardsToggle = document.getElementById('rewardsToggle');
@@ -1152,7 +1041,7 @@ function renderDay(cfg, di, ov, tasks, rewards) {
                 if (justFinishedAll) syncStars('bonus', 'All tasks completed');
             }
 
-            renderDay(cfg, di, ov, tasks, rewards);
+            renderDay(di, ov, tasks, rewards);
 
             // Confetti if just completed all
             if (!wasDone && newDone.length === tasks.length) {
@@ -1167,7 +1056,7 @@ function renderDay(cfg, di, ov, tasks, rewards) {
 }
 
 // ---- Parent Bottom Sheet ----
-function openSheet(cfg) {
+function openSheet() {
     const ov = loadOverrides();
     const stars = loadStars();
     const avail = stars.earned - stars.spent;
@@ -1222,15 +1111,14 @@ function openSheet(cfg) {
 
         <div class="sheet-section-label">Star Sync</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <span style="width:10px;height:10px;border-radius:50%;background:${cfg.syncUrl ? 'var(--md-success)' : 'var(--md-outline)'};flex-shrink:0"></span>
-            <span style="font-size:14px;color:${cfg.syncUrl ? 'var(--md-success)' : 'var(--md-on-surface-variant)'};font-weight:500">${cfg.syncUrl ? 'Connected' : 'Not set up'}</span>
+            <span style="width:10px;height:10px;border-radius:50%;background:${CONFIG.syncUrl ? 'var(--md-success)' : 'var(--md-outline)'};flex-shrink:0"></span>
+            <span style="font-size:14px;color:${CONFIG.syncUrl ? 'var(--md-success)' : 'var(--md-on-surface-variant)'};font-weight:500">${CONFIG.syncUrl ? 'Connected' : 'Not set up'}</span>
         </div>
-        ${cfg.syncUrl ? '<button class="md-btn md-btn-tonal md-btn-full" id="btnSyncNow" style="margin-bottom:10px">☁️ Sync stars now</button>' : ''}
+        ${CONFIG.syncUrl ? '<button class="md-btn md-btn-tonal md-btn-full" id="btnSyncNow" style="margin-bottom:10px">☁️ Sync stars now</button>' : ''}
 
         <div class="sheet-divider"></div>
 
         <button class="md-btn md-btn-tonal md-btn-full" id="btnRefreshSheet" style="margin-bottom:10px">↻ Refresh from Google Sheet</button>
-        <button class="md-btn md-btn-outline md-btn-full" id="btnEditSetup" style="margin-bottom:10px">Edit Setup</button>
         <button class="md-btn md-btn-text md-btn-full md-btn-danger" id="btnResetStars">Reset All Stars</button>
     `;
 
@@ -1277,7 +1165,6 @@ function openSheet(cfg) {
     }
 
     document.getElementById('btnRefreshSheet').addEventListener('click', ()=>{ closeSheet(); showMain(); });
-    document.getElementById('btnEditSetup').addEventListener('click', ()=>{ closeSheet(); showSetup(); });
     document.getElementById('btnResetStars').addEventListener('click', ()=>{
         if (confirm('Reset ALL stars to zero? This cannot be undone.')) {
             saveStars({earned:0, spent:0});
@@ -1305,19 +1192,13 @@ function scheduleMidnight() {
 
 // ---- background refresh (5 min) ----
 setInterval(()=>{
-    const cfg = loadConfig();
-    if (cfg?.sheetId) fetchAll(cfg.sheetId).then(d=>{ cacheData('tasks',d.tasks); cacheData('rewards',d.rewards); }).catch(()=>{});
+    fetchAll(CONFIG.sheetId).then(d=>{ cacheData('tasks',d.tasks); cacheData('rewards',d.rewards); }).catch(()=>{});
 }, 5*60*1000);
 
 // ---- boot ----
 (async () => {
-    const cfg = loadConfig();
-    if (cfg?.sheetId && cfg?.kidName) {
-        await restoreStarsFromSync();
-        showMain();
-    } else {
-        showSetup();
-    }
+    await restoreStarsFromSync();
+    showMain();
     scheduleMidnight();
 })();
 </script>
