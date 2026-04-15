@@ -491,17 +491,20 @@
         }
 
         .star-summary {
-            display: flex;
-            align-items: center;
-            gap: 16px;
             background: var(--md-tertiary-container);
             border-radius: var(--md-shape-md);
             padding: 16px;
             margin-bottom: 16px;
         }
-        .star-summary .star-icon { font-size: 36px; }
-        .star-summary .star-num { font-size: 28px; font-weight: 900; color: var(--md-tertiary); }
-        .star-summary .star-label { font-size: 13px; color: var(--md-on-surface-variant); }
+        .star-summary .star-num { font-size: 28px; font-weight: 900; color: var(--md-tertiary); margin-bottom: 4px; }
+        .star-breakdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 16px;
+            font-size: 13px;
+            color: var(--md-on-surface-variant);
+        }
+        .star-breakdown span { white-space: nowrap; }
 
         .redeem-item {
             display: flex;
@@ -697,6 +700,7 @@
 // ================================================================
 //  MY DAY — A daily routine & star rewards app powered by
 //  Google Sheets. Parent edits the sheet; kid taps on the iPad.
+//  Star system: "Calculate and Bank" model.
 // ================================================================
 
 const PFX = 'myDay_v3';
@@ -708,6 +712,9 @@ const CONFIG = {
     syncUrl: "https://script.google.com/macros/s/AKfycbzPcK0h9FBfd3qAy1rFa95niNDhXZokOUxNo-JT0TcU8NBVjc2UC1rQzrbRpspjf5EB6A/exec",
     syncSecret: "N3YR-owVtiuu3jkixUq4xg"
 };
+
+// ---- in-memory star bank (loaded from server on boot) ----
+let bank = { bankedStars: 0, totalSpent: 0 };
 
 // ---- helpers ----
 const todayKey = () => new Date().toISOString().slice(0,10);
@@ -750,19 +757,15 @@ function matchesDay(dayStr, di, ov) {
     return raw.split(',').map(s=>s.trim()).includes(di.name);
 }
 
-// ---- storage ----
+// ---- storage (localStorage for completions, overrides, caches only) ----
 function load(k,def) { try { return JSON.parse(localStorage.getItem(PFX+'_'+k))||def; } catch { return def; } }
 function save(k,v) { localStorage.setItem(PFX+'_'+k, JSON.stringify(v)); }
 
 function loadDone() { const d=load('done',{}); return d[todayKey()]||[]; }
 function saveDoneList(list) { save('done', {[todayKey()]: list}); }
 
-function loadStars()  { return load('stars', {earned:0, spent:0}); }
-function saveStars(s) { save('stars', s); }
-
 function loadOverrides() {
     const o = load('overrides', {noSchool:false, summer:false, noSchoolDate:null});
-    // Auto-clear noSchool if it was set on a different day
     if (o.noSchool && o.noSchoolDate && o.noSchoolDate !== todayKey()) {
         o.noSchool = false; o.noSchoolDate = null;
         save('overrides', o);
@@ -774,54 +777,45 @@ function saveOverrides(o) { save('overrides', o); }
 function cacheData(k,v) { try { localStorage.setItem(PFX+'_cache_'+k, JSON.stringify(v)); } catch{} }
 function cached(k) { try { return JSON.parse(localStorage.getItem(PFX+'_cache_'+k)); } catch { return null; } }
 
-// ---- star sync ----
-function syncStars(action, details) {
-    try {
-        if (!CONFIG.syncUrl) return;
-        const s = loadStars();
-        const now = new Date();
-        const body = {
-            secret: CONFIG.syncSecret,
-            date: todayKey(),
-            time: now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}),
-            action: action,
-            details: details,
-            earned: s.earned,
-            spent: s.spent,
-            available: s.earned - s.spent
-        };
-        fetch(CONFIG.syncUrl, {
-            method: 'POST',
-            headers: {'Content-Type': 'text/plain'},
-            body: JSON.stringify(body),
-            mode: 'no-cors'
-        }).catch(()=>{});
-    } catch(e) {}
+// ---- pure star calculation ----
+function calculateTodayStars(todayTasks, completions) {
+    let stars = 0;
+    todayTasks.forEach(task => {
+        if (completions.includes(task.id)) stars += task.stars;
+    });
+    if (completions.length >= todayTasks.length && todayTasks.length > 0) stars += DAILY_BONUS;
+    return stars;
 }
 
-async function restoreStarsFromSync() {
+function getAvailableStars(todayTasks, completions) {
+    return bank.bankedStars + calculateTodayStars(todayTasks, completions) - bank.totalSpent;
+}
+
+// ---- sync: bank ----
+async function loadBankFromSync() {
     try {
         if (!CONFIG.syncUrl) return;
-        const r = await fetch(CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret);
+        const r = await fetch(CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret + '&type=bank');
         if (!r.ok) return;
         const data = await r.json();
-        if (data && typeof data.earned === 'number') {
-            const local = loadStars();
-            if (data.earned > local.earned) {
-                saveStars({earned: data.earned, spent: data.spent || 0});
-            }
+        if (data && typeof data.bankedStars === 'number') {
+            bank.bankedStars = data.bankedStars;
+            bank.totalSpent = data.totalSpent || 0;
         }
     } catch(e) {}
 }
 
-function syncCompletions(doneList) {
+// ---- sync: completions ----
+function syncCompletions(doneList, todayTasks) {
     try {
         if (!CONFIG.syncUrl) return;
+        const starsEarned = calculateTodayStars(todayTasks, doneList);
         const body = {
             secret: CONFIG.syncSecret,
             action: 'save_progress',
             date: todayKey(),
-            completions: doneList
+            completions: doneList,
+            starsEarned: starsEarned
         };
         fetch(CONFIG.syncUrl, {
             method: 'POST',
@@ -841,6 +835,56 @@ async function restoreCompletionsFromSync() {
         if (data && Array.isArray(data.completions)) {
             saveDoneList(data.completions);
         }
+    } catch(e) {}
+}
+
+// ---- sync: redeem ----
+async function syncRedeem(cost, rewardName) {
+    try {
+        if (!CONFIG.syncUrl) return;
+        const body = {
+            secret: CONFIG.syncSecret,
+            action: 'redeem',
+            date: todayKey(),
+            cost: cost,
+            rewardName: rewardName
+        };
+        const r = await fetch(CONFIG.syncUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain'},
+            body: JSON.stringify(body)
+        });
+        if (r.ok) {
+            const data = await r.json();
+            if (data && typeof data.totalSpent === 'number') {
+                bank.totalSpent = data.totalSpent;
+            }
+        }
+    } catch(e) {
+        // Optimistic: already updated in memory before calling
+    }
+}
+
+// ---- sync: adjust bank ----
+async function syncAdjustBank(newBanked) {
+    try {
+        if (!CONFIG.syncUrl) return;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yKey = yesterday.toISOString().slice(0,10);
+        const body = {
+            secret: CONFIG.syncSecret,
+            action: 'adjust_bank',
+            bankedStars: newBanked,
+            lastBankedDate: yKey
+        };
+        await fetch(CONFIG.syncUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain'},
+            body: JSON.stringify(body),
+            mode: 'no-cors'
+        });
+        bank.bankedStars = newBanked;
     } catch(e) {}
 }
 
@@ -961,15 +1005,15 @@ let rewardsOpen = false;
 async function showMain() {
     const di = dayInfo();
     const ov = loadOverrides();
-    const stars = loadStars();
-    const avail = stars.earned - stars.spent;
+    const done = loadDone();
 
+    // Show loading with current star count
     app.innerHTML = `
     <div class="main-screen">
         <div class="header">
             <h1>${CONFIG.kidName}'s Day</h1>
             <div class="date">${di.display}</div>
-            <div class="star-counter" id="starCounter">⭐ ${avail} stars</div>
+            <div class="star-counter" id="starCounter">⭐ loading…</div>
             ${ov.noSchool ? '<div class="override-banner">📅 No school today</div>' : ''}
             ${ov.summer ? '<div class="override-banner">☀️ Summer break mode</div>' : ''}
         </div>
@@ -1004,6 +1048,7 @@ async function showMain() {
     const todayTasks = data.tasks.filter(t => matchesDay(t.days, di, ov));
 
     if (todayTasks.length === 0) {
+        const avail = getAvailableStars([], []);
         app.innerHTML = `
         <div class="main-screen">
             <div class="header"><h1>${CONFIG.kidName}'s Day</h1><div class="date">${di.display}</div>
@@ -1024,8 +1069,8 @@ async function showMain() {
 
 function renderDay(di, ov, tasks, rewards) {
     const done = loadDone();
-    const stars = loadStars();
-    const avail = stars.earned - stars.spent;
+    const todayStars = calculateTodayStars(tasks, done);
+    const avail = bank.bankedStars + todayStars - bank.totalSpent;
 
     // Group by section
     const sections = [];
@@ -1149,33 +1194,22 @@ function renderDay(di, ov, tasks, rewards) {
             const taskStars = Number(this.dataset.stars);
             const currentDone = loadDone();
             const wasDone = currentDone.includes(id);
-            const allWereDone = currentDone.length === tasks.length;
 
             let newDone;
-            const s = loadStars();
-
-            const taskName = tasks.find(t=>t.id===id)?.name || '';
             if (wasDone) {
                 newDone = currentDone.filter(x=>x!==id);
-                s.earned -= taskStars;
-                if (allWereDone) s.earned -= DAILY_BONUS; // remove bonus
-                saveDoneList(newDone);
-                saveStars(s);
-                syncStars('task_uncomplete', taskName);
-                syncCompletions(newDone);
             } else {
                 newDone = [...currentDone, id];
-                s.earned += taskStars;
                 floatStar(this, taskStars);
-                const justFinishedAll = newDone.length === tasks.length;
-                if (justFinishedAll) s.earned += DAILY_BONUS; // add bonus
-                saveDoneList(newDone);
-                saveStars(s);
-                syncStars('task_complete', taskName);
-                syncCompletions(newDone);
-                if (justFinishedAll) syncStars('bonus', 'All tasks completed');
             }
 
+            // Save completions to localStorage
+            saveDoneList(newDone);
+
+            // Sync completions + starsEarned to server (fire-and-forget)
+            syncCompletions(newDone, tasks);
+
+            // Re-render with recalculated stars
             renderDay(di, ov, tasks, rewards);
 
             // Confetti if just completed all
@@ -1193,8 +1227,10 @@ function renderDay(di, ov, tasks, rewards) {
 // ---- Parent Bottom Sheet ----
 function openSheet() {
     const ov = loadOverrides();
-    const stars = loadStars();
-    const avail = stars.earned - stars.spent;
+    const done = loadDone();
+    const todayTasks = (cached('tasks') || []).filter(t => matchesDay(t.days, dayInfo(), ov));
+    const todayStars = calculateTodayStars(todayTasks, done);
+    const avail = bank.bankedStars + todayStars - bank.totalSpent;
     const rewards = cached('rewards') || [];
 
     const redeemItems = rewards.map(r => {
@@ -1230,12 +1266,14 @@ function openSheet() {
 
         <div class="sheet-section-label">Stars</div>
         <div class="star-summary">
-            <span class="star-icon">⭐</span>
-            <div>
-                <div class="star-num">${avail}</div>
-                <div class="star-label">stars available (${stars.earned} earned · ${stars.spent} spent)</div>
+            <div class="star-num">⭐ ${avail} available</div>
+            <div class="star-breakdown">
+                <span>🏦 Banked: ${bank.bankedStars}</span>
+                <span>📅 Today: ${todayStars}</span>
+                <span>🎁 Spent: ${bank.totalSpent}</span>
             </div>
         </div>
+        <button class="md-btn md-btn-outline md-btn-full" id="btnAdjustStars" style="margin-bottom:16px">✏️ Adjust Stars</button>
 
         ${rewards.length > 0 ? `
         <div class="sheet-section-label">Redeem a Reward</div>
@@ -1275,16 +1313,27 @@ function openSheet() {
         showMain();
     });
 
+    // Adjust stars
+    document.getElementById('btnAdjustStars').addEventListener('click', async function() {
+        const val = prompt('Enter the correct banked star total:', bank.bankedStars);
+        if (val === null) return;
+        const num = parseInt(val);
+        if (isNaN(num) || num < 0) { alert('Please enter a valid number.'); return; }
+        await syncAdjustBank(num);
+        closeSheet();
+        showMain();
+    });
+
     // Redeem events
     $$('.redeem-btn.can-afford').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', async function() {
             const cost = Number(this.dataset.cost);
             const name = this.dataset.name;
             if (confirm(`Redeem "${name}" for ${cost} stars?`)) {
-                const s = loadStars();
-                s.spent += cost;
-                saveStars(s);
-                syncStars('redeem', name);
+                // Optimistic update
+                bank.totalSpent += cost;
+                // Sync to server
+                syncRedeem(cost, name);
                 closeSheet();
                 showMain();
             }
@@ -1294,7 +1343,9 @@ function openSheet() {
     const btnSync = document.getElementById('btnSyncNow');
     if (btnSync) {
         btnSync.addEventListener('click', ()=>{
-            syncStars('manual_sync', 'Manual sync from parent panel');
+            const done = loadDone();
+            const tt = (cached('tasks') || []).filter(t => matchesDay(t.days, dayInfo(), loadOverrides()));
+            syncCompletions(done, tt);
             btnSync.textContent = '✓ Synced!';
             setTimeout(()=>{ btnSync.textContent = '☁️ Sync stars now'; }, 2000);
         });
@@ -1302,9 +1353,21 @@ function openSheet() {
 
     document.getElementById('btnHistory').addEventListener('click', ()=>{ showHistory(); });
     document.getElementById('btnRefreshSheet').addEventListener('click', ()=>{ closeSheet(); showMain(); });
-    document.getElementById('btnResetStars').addEventListener('click', ()=>{
+    document.getElementById('btnResetStars').addEventListener('click', async ()=>{
         if (confirm('Reset ALL stars to zero? This cannot be undone.')) {
-            saveStars({earned:0, spent:0});
+            await syncAdjustBank(0);
+            bank.totalSpent = 0;
+            // Also reset spent on server
+            try {
+                if (CONFIG.syncUrl) {
+                    fetch(CONFIG.syncUrl, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'text/plain'},
+                        body: JSON.stringify({secret: CONFIG.syncSecret, action: 'reset_stars'}),
+                        mode: 'no-cors'
+                    }).catch(()=>{});
+                }
+            } catch(e) {}
             closeSheet();
             showMain();
         }
@@ -1344,7 +1407,6 @@ async function showHistory() {
         return;
     }
 
-    // history should be an array of {date, completions} or object keyed by date
     let days = [];
     if (Array.isArray(history)) {
         days = history;
@@ -1355,10 +1417,7 @@ async function showHistory() {
         }));
     }
 
-    // Sort newest first
     days.sort((a,b) => b.date.localeCompare(a.date));
-
-    // Filter out days with no data
     days = days.filter(d => d.completions && d.completions.length > 0);
 
     if (days.length === 0) {
@@ -1374,14 +1433,12 @@ async function showHistory() {
 
     const dayCards = days.map((day, idx) => {
         const di = dayInfoFor(day.date);
-        // Figure out which tasks applied that day (assume no overrides for past days)
         const pastOv = {noSchool: false, summer: ov.summer};
         const dayTasks = allTasks.filter(t => matchesDay(t.days, di, pastOv));
         const completedIds = day.completions || [];
         const nDone = dayTasks.filter(t => completedIds.includes(t.id)).length;
         const nTotal = dayTasks.length;
-        const starsEarned = dayTasks.filter(t => completedIds.includes(t.id)).reduce((sum, t) => sum + t.stars, 0)
-            + (nDone === nTotal && nTotal > 0 ? DAILY_BONUS : 0);
+        const starsEarned = calculateTodayStars(dayTasks, completedIds);
 
         const taskList = dayTasks.map(t => {
             const done = completedIds.includes(t.id);
@@ -1414,7 +1471,6 @@ async function showHistory() {
 
     document.getElementById('histBack4').addEventListener('click', showMain);
 
-    // Collapsible day cards
     document.querySelectorAll('.history-day-header').forEach(hdr => {
         hdr.addEventListener('click', function() {
             const i = this.dataset.idx;
@@ -1445,7 +1501,7 @@ setInterval(()=>{
 
 // ---- boot ----
 (async () => {
-    await Promise.all([restoreStarsFromSync(), restoreCompletionsFromSync()]);
+    await Promise.all([loadBankFromSync(), restoreCompletionsFromSync()]);
     showMain();
     scheduleMidnight();
 })();
