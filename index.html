@@ -738,6 +738,47 @@ function saveOverrides(o) { save('overrides', o); }
 function cacheData(k,v) { try { localStorage.setItem(PFX+'_cache_'+k, JSON.stringify(v)); } catch{} }
 function cached(k) { try { return JSON.parse(localStorage.getItem(PFX+'_cache_'+k)); } catch { return null; } }
 
+// ---- star sync ----
+function syncStars(action, details) {
+    try {
+        const cfg = loadConfig();
+        if (!cfg?.syncUrl) return;
+        const s = loadStars();
+        const now = new Date();
+        const body = {
+            date: todayKey(),
+            time: now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}),
+            action: action,
+            details: details,
+            earned: s.earned,
+            spent: s.spent,
+            available: s.earned - s.spent
+        };
+        fetch(cfg.syncUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain'},
+            body: JSON.stringify(body),
+            mode: 'no-cors'
+        }).catch(()=>{});
+    } catch(e) {}
+}
+
+async function restoreStarsFromSync() {
+    try {
+        const cfg = loadConfig();
+        if (!cfg?.syncUrl) return;
+        const r = await fetch(cfg.syncUrl);
+        if (!r.ok) return;
+        const data = await r.json();
+        if (data && typeof data.earned === 'number') {
+            const local = loadStars();
+            if (data.earned > local.earned) {
+                saveStars({earned: data.earned, spent: data.spent || 0});
+            }
+        }
+    } catch(e) {}
+}
+
 // ---- google sheets ----
 function extractId(input) {
     const m = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
@@ -868,6 +909,8 @@ function showSetup() {
             <input class="md-input" type="text" id="fName" placeholder="e.g. Alex" value="${cfg?.kidName||''}">
             <label>GOOGLE SHEET URL OR ID</label>
             <input class="md-input" type="text" id="fSheet" placeholder="Paste the full URL or just the ID" value="${cfg?.sheetUrl||''}">
+            <label>STAR SYNC URL (OPTIONAL)</label>
+            <input class="md-input" type="text" id="fSync" placeholder="https://script.google.com/macros/s/AKfycbzrWi8qwMz_ElsphsCcwXs86mlsON56oai5L9jaaUDPR5R9Dgo0FmZ6fLB6Ac-mleYtkA/exec" value="${cfg?.syncUrl||''}">
             <div class="setup-help">
                 <strong>How to connect:</strong><br>
                 1. Open the Google Sheet on your phone<br>
@@ -881,7 +924,8 @@ function showSetup() {
         const name=document.getElementById('fName').value.trim();
         const raw=document.getElementById('fSheet').value.trim();
         if (!name||!raw) { alert('Please fill in both fields.'); return; }
-        saveConfig({kidName:name, sheetId:extractId(raw), sheetUrl:raw});
+        const sync=document.getElementById('fSync').value.trim();
+        saveConfig({kidName:name, sheetId:extractId(raw), sheetUrl:raw, syncUrl:sync});
         showMain();
     });
 }
@@ -1088,19 +1132,26 @@ function renderDay(cfg, di, ov, tasks, rewards) {
             let newDone;
             const s = loadStars();
 
+            const taskName = tasks.find(t=>t.id===id)?.name || '';
             if (wasDone) {
                 newDone = currentDone.filter(x=>x!==id);
                 s.earned -= taskStars;
                 if (allWereDone) s.earned -= DAILY_BONUS; // remove bonus
+                saveDoneList(newDone);
+                saveStars(s);
+                syncStars('task_uncomplete', taskName);
             } else {
                 newDone = [...currentDone, id];
                 s.earned += taskStars;
                 floatStar(this, taskStars);
-                if (newDone.length === tasks.length) s.earned += DAILY_BONUS; // add bonus
+                const justFinishedAll = newDone.length === tasks.length;
+                if (justFinishedAll) s.earned += DAILY_BONUS; // add bonus
+                saveDoneList(newDone);
+                saveStars(s);
+                syncStars('task_complete', taskName);
+                if (justFinishedAll) syncStars('bonus', 'All tasks completed');
             }
 
-            saveDoneList(newDone);
-            saveStars(s);
             renderDay(cfg, di, ov, tasks, rewards);
 
             // Confetti if just completed all
@@ -1169,6 +1220,15 @@ function openSheet(cfg) {
 
         <div class="sheet-divider"></div>
 
+        <div class="sheet-section-label">Star Sync</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <span style="width:10px;height:10px;border-radius:50%;background:${cfg.syncUrl ? 'var(--md-success)' : 'var(--md-outline)'};flex-shrink:0"></span>
+            <span style="font-size:14px;color:${cfg.syncUrl ? 'var(--md-success)' : 'var(--md-on-surface-variant)'};font-weight:500">${cfg.syncUrl ? 'Connected' : 'Not set up'}</span>
+        </div>
+        ${cfg.syncUrl ? '<button class="md-btn md-btn-tonal md-btn-full" id="btnSyncNow" style="margin-bottom:10px">☁️ Sync stars now</button>' : ''}
+
+        <div class="sheet-divider"></div>
+
         <button class="md-btn md-btn-tonal md-btn-full" id="btnRefreshSheet" style="margin-bottom:10px">↻ Refresh from Google Sheet</button>
         <button class="md-btn md-btn-outline md-btn-full" id="btnEditSetup" style="margin-bottom:10px">Edit Setup</button>
         <button class="md-btn md-btn-text md-btn-full md-btn-danger" id="btnResetStars">Reset All Stars</button>
@@ -1200,11 +1260,21 @@ function openSheet(cfg) {
                 const s = loadStars();
                 s.spent += cost;
                 saveStars(s);
+                syncStars('redeem', name);
                 closeSheet();
                 showMain();
             }
         });
     });
+
+    const btnSync = document.getElementById('btnSyncNow');
+    if (btnSync) {
+        btnSync.addEventListener('click', ()=>{
+            syncStars('manual_sync', 'Manual sync from parent panel');
+            btnSync.textContent = '✓ Synced!';
+            setTimeout(()=>{ btnSync.textContent = '☁️ Sync stars now'; }, 2000);
+        });
+    }
 
     document.getElementById('btnRefreshSheet').addEventListener('click', ()=>{ closeSheet(); showMain(); });
     document.getElementById('btnEditSetup').addEventListener('click', ()=>{ closeSheet(); showSetup(); });
@@ -1240,10 +1310,16 @@ setInterval(()=>{
 }, 5*60*1000);
 
 // ---- boot ----
-const cfg = loadConfig();
-if (cfg?.sheetId && cfg?.kidName) showMain();
-else showSetup();
-scheduleMidnight();
+(async () => {
+    const cfg = loadConfig();
+    if (cfg?.sheetId && cfg?.kidName) {
+        await restoreStarsFromSync();
+        showMain();
+    } else {
+        showSetup();
+    }
+    scheduleMidnight();
+})();
 </script>
 </body>
 </html>
