@@ -791,104 +791,106 @@ function getAvailableStars(todayTasks, completions) {
     return bank.bankedStars + calculateTodayStars(todayTasks, completions) - bank.totalSpent;
 }
 
+// ---- sync helpers ----
+async function postToSync(body) {
+    if (!CONFIG.syncUrl) return null;
+    const r = await fetch(CONFIG.syncUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain'},
+        redirect: 'follow',
+        body: JSON.stringify(body)
+    });
+    const text = await r.text();
+    try { return JSON.parse(text); } catch { return null; }
+}
+
+async function getFromSync(params) {
+    if (!CONFIG.syncUrl) return null;
+    const url = CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret + '&' + params;
+    const r = await fetch(url, {redirect: 'follow'});
+    const text = await r.text();
+    try { return JSON.parse(text); } catch { return null; }
+}
+
 // ---- sync: bank ----
 async function loadBankFromSync() {
     try {
-        if (!CONFIG.syncUrl) return;
-        const r = await fetch(CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret + '&type=bank');
-        if (!r.ok) return;
-        const data = await r.json();
+        const data = await getFromSync('type=bank');
         if (data && typeof data.bankedStars === 'number') {
             bank.bankedStars = data.bankedStars;
             bank.totalSpent = data.totalSpent || 0;
         }
-    } catch(e) {}
+    } catch(e) { console.error('loadBank failed:', e); }
 }
 
 // ---- sync: completions ----
 function syncCompletions(doneList, todayTasks) {
     try {
-        if (!CONFIG.syncUrl) return;
         const starsEarned = calculateTodayStars(todayTasks, doneList);
-        const body = {
+        postToSync({
             secret: CONFIG.syncSecret,
             action: 'save_progress',
             date: todayKey(),
             completions: doneList,
             starsEarned: starsEarned
-        };
-        fetch(CONFIG.syncUrl, {
-            method: 'POST',
-            headers: {'Content-Type': 'text/plain'},
-            body: JSON.stringify(body)
-        }).catch(()=>{});
+        }).catch(e => console.error('syncCompletions failed:', e));
     } catch(e) {}
 }
 
 async function restoreCompletionsFromSync() {
     try {
-        if (!CONFIG.syncUrl) return;
-        const r = await fetch(CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret + '&type=progress&date=' + todayKey());
-        if (!r.ok) return;
-        const data = await r.json();
+        const data = await getFromSync('type=progress&date=' + todayKey());
         if (data && Array.isArray(data.completions)) {
             saveDoneList(data.completions);
         }
-    } catch(e) {}
+    } catch(e) { console.error('restoreCompletions failed:', e); }
 }
 
 // ---- sync: redeem ----
 async function syncRedeem(cost, rewardName) {
     try {
-        if (!CONFIG.syncUrl) return;
-        const body = {
+        const data = await postToSync({
             secret: CONFIG.syncSecret,
             action: 'redeem',
             date: todayKey(),
             cost: cost,
             rewardName: rewardName
-        };
-        const r = await fetch(CONFIG.syncUrl, {
-            method: 'POST',
-            headers: {'Content-Type': 'text/plain'},
-            body: JSON.stringify(body)
         });
-        if (r.ok) {
-            const data = await r.json();
-            if (data && typeof data.totalSpent === 'number') {
-                bank.totalSpent = data.totalSpent;
-            }
+        if (data && typeof data.totalSpent === 'number') {
+            bank.totalSpent = data.totalSpent;
+        } else if (data && data.error) {
+            console.error('Redeem error:', data.error);
         }
     } catch(e) {
-        // Optimistic: already updated in memory before calling
+        console.error('syncRedeem failed:', e);
     }
 }
 
 // ---- sync: adjust bank ----
 async function syncAdjustBank(newBanked) {
     try {
-        if (!CONFIG.syncUrl) return;
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yKey = yesterday.toISOString().slice(0,10);
-        const body = {
+        const data = await postToSync({
             secret: CONFIG.syncSecret,
             action: 'adjust_bank',
             bankedStars: newBanked,
             lastBankedDate: yKey
-        };
-        const r = await fetch(CONFIG.syncUrl, {
-            method: 'POST',
-            headers: {'Content-Type': 'text/plain'},
-            body: JSON.stringify(body)
         });
-        if (r.ok) {
+        if (data && data.status === 'ok') {
             bank.bankedStars = newBanked;
+            // Verify by re-reading from server
+            await loadBankFromSync();
+            if (bank.bankedStars !== newBanked) {
+                alert('Warning: Server returned ' + bank.bankedStars + ' instead of ' + newBanked + '. Check the Bank tab in your Google Sheet.');
+            }
         } else {
-            alert('Failed to save. Please try again.');
+            alert('Failed to save stars. Server response: ' + JSON.stringify(data));
         }
     } catch(e) {
-        alert('Failed to save. Check your connection.');
+        alert('Failed to save stars. Error: ' + e.message);
+        console.error('syncAdjustBank failed:', e);
     }
 }
 
@@ -1348,13 +1350,24 @@ function openSheet() {
     if (btnSync) {
         btnSync.addEventListener('click', async ()=>{
             btnSync.textContent = '⏳ Syncing…';
-            // Push current completions to server
-            const done = loadDone();
-            const tt = (cached('tasks') || []).filter(t => matchesDay(t.days, dayInfo(), loadOverrides()));
-            syncCompletions(done, tt);
-            // Pull latest bank + completions from server
-            await Promise.all([loadBankFromSync(), restoreCompletionsFromSync()]);
-            btnSync.textContent = '✓ Synced!';
+            try {
+                // Push current completions to server
+                const done = loadDone();
+                const tt = (cached('tasks') || []).filter(t => matchesDay(t.days, dayInfo(), loadOverrides()));
+                await postToSync({
+                    secret: CONFIG.syncSecret,
+                    action: 'save_progress',
+                    date: todayKey(),
+                    completions: done,
+                    starsEarned: calculateTodayStars(tt, done)
+                });
+                // Pull latest bank + completions from server
+                await Promise.all([loadBankFromSync(), restoreCompletionsFromSync()]);
+                btnSync.textContent = '✓ Synced!';
+            } catch(e) {
+                btnSync.textContent = '✗ Failed';
+                console.error('Sync failed:', e);
+            }
             setTimeout(()=>{ closeSheet(); showMain(); }, 800);
         });
     }
@@ -1364,18 +1377,12 @@ function openSheet() {
     document.getElementById('btnResetStars').addEventListener('click', async ()=>{
         if (confirm('Reset ALL stars to zero? This cannot be undone.')) {
             try {
-                if (CONFIG.syncUrl) {
-                    const r = await fetch(CONFIG.syncUrl, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'text/plain'},
-                        body: JSON.stringify({secret: CONFIG.syncSecret, action: 'reset_stars'})
-                    });
-                    if (r.ok) {
-                        bank.bankedStars = 0;
-                        bank.totalSpent = 0;
-                    }
+                const data = await postToSync({secret: CONFIG.syncSecret, action: 'reset_stars'});
+                if (data && data.status === 'ok') {
+                    bank.bankedStars = 0;
+                    bank.totalSpent = 0;
                 }
-            } catch(e) {}
+            } catch(e) { console.error('resetStars failed:', e); }
             closeSheet();
             showMain();
         }
@@ -1401,9 +1408,8 @@ async function showHistory() {
 
     let history;
     try {
-        const r = await fetch(CONFIG.syncUrl + '?secret=' + CONFIG.syncSecret + '&type=history');
-        if (!r.ok) throw new Error();
-        history = await r.json();
+        history = await getFromSync('type=history');
+        if (!history) throw new Error('No data');
     } catch {
         app.innerHTML = `
         <div class="history-screen">
