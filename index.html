@@ -327,7 +327,16 @@ let starData = { totalEarned: 0, totalSpent: 0, days: [], version: 0 };
 let currentView = 'main'; // 'main' or 'history'
 
 // ---- helpers ----
-const todayKey = () => new Date().toISOString().slice(0,10);
+// Use LOCAL date (not UTC) so "today" rolls over at local midnight, not UTC midnight.
+// Previously used toISOString() which returned UTC, causing tasks done Wed evening (PT)
+// to be saved under Thursday's date because UTC had already rolled over.
+const todayKey = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+};
 const $ = sel => document.querySelector(sel);
 const $$ = sel => document.querySelectorAll(sel);
 
